@@ -2,6 +2,8 @@ from decimal import Decimal, getcontext
 import json
 
 with open('tests.json') as f:
+    # Toss the first line, it's just for JavaScript
+    f.readline()
     tests = json.loads(f.read())
 
 getcontext().prec = 100
