@@ -239,6 +239,9 @@ test("_carry", function() {
 	same(StringDecimal._carry([9]), [9], "nine");
 	same(StringDecimal._carry([1, 0]), [1, 0], "one zero");
 	same(StringDecimal._carry([10]), [1, 0], "ten");
+	same(StringDecimal._carry([1,-10]), [0, 0], "one negative ten");
+	same(StringDecimal._carry([1,-9]), [0, 1], "one negative nine");
+	same(StringDecimal._carry([1,-1]), [0, 9], "one negative one");
 });
 
 /* Copied directly from tests.json */
