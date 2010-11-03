@@ -7,7 +7,7 @@ var StringDecimal = (function(){
 			result.push(parseInt(str[i], 10));
 		}
 		return result;
-	}
+	};
 
 	o._array_to_string = function(arr) {
 		var result = "";
@@ -15,7 +15,7 @@ var StringDecimal = (function(){
 			result += arr[i];
 		}
 		return result;
-	}
+	};
 
 	/*
 	 * Parses a string into a sign, mantissa, and exponent.
@@ -34,7 +34,7 @@ var StringDecimal = (function(){
 			'mantissa': o._string_to_array(mantissa_as_a_string),
 			'exponent': exponent
 		};
-	}
+	};
 
 	o._format = function(obj) {
 		var sign = (obj.sign == "-") ? "-" : "";
@@ -45,7 +45,7 @@ var StringDecimal = (function(){
 			mantissa.substr(0, decimal_point_offset) +
 			decimal_point + 
 			mantissa.substr(decimal_point_offset);
-	}
+	};
 
 	o._array_add = function(a, b) {
 		if (a.length != b.length) {
@@ -56,7 +56,7 @@ var StringDecimal = (function(){
 			result.push(a[i] + b[i]);
 		}
 		return result;
-	}
+	};
 
 	o._match_exponents = function(a, b) {
 		while (a.exponent > b.exponent) {
@@ -67,7 +67,7 @@ var StringDecimal = (function(){
 			a.exponent++;
 			a.mantissa.push(0);
 		}
-	}
+	};
 
 	o._match_leading = function(a, b) {
 		if (a.exponent != b.exponent) {
@@ -79,7 +79,7 @@ var StringDecimal = (function(){
 		while (b.mantissa.length > a.mantissa.length) {
 			a.mantissa.unshift(0);
 		}
-	}
+	};
 
 	o._carry = function(arr) {
 		var carry = 0;
@@ -95,7 +95,7 @@ var StringDecimal = (function(){
 		}
 		result.reverse()
 		return result;
-	}
+	};
 
 	o.add = function(raw_a, raw_b) {
 		var a = o._parse(raw_a);
@@ -126,8 +126,6 @@ var StringDecimal = (function(){
 		}
 		return o._format(sum);
 	};
-
-	
 
 	return o;
 })();
