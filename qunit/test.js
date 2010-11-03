@@ -29,11 +29,12 @@ test("_array_add", function() {
 	same(StringDecimal._array_add([9], [1]), [10], "nine plus one is ten");
 });
 
-test("_array_negate", function() {
-	same(StringDecimal._array_negate([0]), [0], "negated zero is zero");
-	same(StringDecimal._array_negate([1]), [-1], "negated one is negative one");
-	same(StringDecimal._array_negate([1, 2]), [-1, -2], "negated one two is negative one negative two");
-});
+test("_array_multiply", function() {
+	same(StringDecimal._array_multiply([0], -1), [0], "negated zero is zero");
+	same(StringDecimal._array_multiply([1], -1), [-1], "negated one is negative one");
+	same(StringDecimal._array_multiply([1, 2], -1), [-1, -2], "negated one two is negative one negative two");
+	same(StringDecimal._array_multiply([1, 2], 9), [9, 18], "one two times 9 is nine eightteen");
+})
 
 test("_array_fill", function() {
 	same(StringDecimal._array_fill(0, 0), [], "empty array");
@@ -251,6 +252,7 @@ var operator_tests = [
 	["add", "0.0", "0", "0.0"],
 	["add", "0.0", "0.0", "0.0"],
 	["add", "0.00", "0", "0.00"],
+	["add", "0.00", "0.0", "0.00"],
 
 	["add", "-0", "0", "0"],
 	["add", "0", "-0", "0"],
@@ -311,6 +313,7 @@ var operator_tests = [
 	["subtract", "0.0", "0", "0.0"],
 	["subtract", "0.0", "0.0", "0.0"],
 	["subtract", "0.00", "0", "0.00"],
+	["subtract", "0.00", "0.0", "0.00"],
 
 	["subtract", "-0", "0", "-0"],
 	["subtract", "0", "-0", "0"],

@@ -67,13 +67,13 @@ var StringDecimal = (function(){
 		return result;
 	};
 
-	o._array_negate = function(arr) {
+	o._array_multiply = function(arr, n) {
 		var result = [];
 		for (var i = 0; i < arr.length; i++) {
-			result.push(-arr[i]);
+			result.push(arr[i] * n);
 		}
 		return result;
-	};
+	}
 
 	o._match_exponents = function(a, b) {
 		while (a.exponent > b.exponent) {
@@ -141,13 +141,13 @@ var StringDecimal = (function(){
 			if (a.mantissa > b.mantissa) {
 				sum = {
 					'sign': a.sign,
-					'mantissa': o._carry(o._array_add(a.mantissa, o._array_negate(b.mantissa))),
+					'mantissa': o._carry(o._array_add(a.mantissa, o._array_multiply(b.mantissa, -1))),
 					'exponent': a.exponent
 				}
 			} else if (a.mantissa < b.mantissa) {
 				sum = {
 					'sign': b.sign,
-					'mantissa': o._carry(o._array_add(o._array_negate(a.mantissa), b.mantissa)),
+					'mantissa': o._carry(o._array_add(o._array_multiply(a.mantissa, -1), b.mantissa)),
 					'exponent': a.exponent
 				}
 			} else {
