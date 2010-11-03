@@ -1,3 +1,11 @@
+function copy_StringDecimal(a) {
+	return {
+		'sign': a.sign,
+		'mantissa': a.mantissa.slice(),
+		'exponent': a.exponent
+	}
+}
+
 test("_string_to_array", function() {
 	same(StringDecimal._string_to_array("0"), [0], "zero");
 	same(StringDecimal._string_to_array("1"), [1], "one");
@@ -102,13 +110,6 @@ test("_format", function() {
 
 
 test("_match_exponents", function() {
-	var copy = function(a) {
-		return {
-			'sign': a.sign,
-			'mantissa': a.mantissa.slice(),
-			'exponent': a.exponent
-		}
-	}
 	var base = {
 		'sign': '+',
 		'mantissa': [0],
@@ -116,16 +117,16 @@ test("_match_exponents", function() {
 	};
 	var a, b;
 
-	a = copy(base);
-	b = copy(base);
+	a = copy_StringDecimal(base);
+	b = copy_StringDecimal(base);
 	StringDecimal._match_exponents(a, b);
 	same(a.mantissa, [0]);
 	same(a.exponent, 0);
 	same(a.mantissa, b.mantissa);
 	same(a.exponent, b.exponent);
 
-	a = copy(base);
-	b = copy(base);
+	a = copy_StringDecimal(base);
+	b = copy_StringDecimal(base);
 	a.mantissa = [0, 0];
 	a.exponent = 1;
 	StringDecimal._match_exponents(a, b);
@@ -134,13 +135,48 @@ test("_match_exponents", function() {
 	same(a.mantissa, b.mantissa);
 	same(a.exponent, b.exponent);
 
-	a = copy(base);
-	b = copy(base);
+	a = copy_StringDecimal(base);
+	b = copy_StringDecimal(base);
 	b.mantissa = [0, 0];
 	b.exponent = 1;
 	StringDecimal._match_exponents(a, b);
 	same(a.mantissa, [0, 0]);
 	same(a.exponent, 1);
+	same(a.mantissa, b.mantissa);
+	same(a.exponent, b.exponent);
+});
+
+test('_match_leading', function() {
+	var base = {
+		'sign': '+',
+		'mantissa': [0],
+		'exponent': 0
+	};
+	var a, b;
+
+	a = copy_StringDecimal(base);
+	b = copy_StringDecimal(base);
+	StringDecimal._match_leading(a, b);
+	same(a.mantissa, [0]);
+	same(a.exponent, 0);
+	same(a.mantissa, b.mantissa);
+	same(a.exponent, b.exponent);
+
+	a = copy_StringDecimal(base);
+	b = copy_StringDecimal(base);
+	a.mantissa = [0, 0];
+	StringDecimal._match_leading(a, b);
+	same(a.mantissa, [0, 0]);
+	same(a.exponent, 0);
+	same(a.mantissa, b.mantissa);
+	same(a.exponent, b.exponent);
+
+	a = copy_StringDecimal(base);
+	b = copy_StringDecimal(base);
+	b.mantissa = [0, 0];
+	StringDecimal._match_leading(a, b);
+	same(a.mantissa, [0, 0]);
+	same(a.exponent, 0);
 	same(a.mantissa, b.mantissa);
 	same(a.exponent, b.exponent);
 });
@@ -189,17 +225,21 @@ var operator_tests = [
 	["add", "-1", "1.0", "0.0"],
 	["add", "-0", "1.0", "1.0"],
 	["add", "-2", "1.0", "-1.0"],
-	["add", "-1", "2.0", "1.0"]
+	["add", "-1", "2.0", "1.0"],
+
+	["add", "1", "10", "11"],
+	["add", "1", "19", "20"]
 ];
 
 for (var i = 0; i < operator_tests.length; i++) {
-	test("operator_tests case "+i, 1, (
-		function(testcase) {
+	var testcase = operator_tests[i];
+	var name = testcase[0]+"('"+testcase[1]+"', '"+testcase[2]+"')";
+	test("operator_tests case "+name, 1, (
+		function(testcase, name) {
 			return function() {
 				var actual = StringDecimal.add(testcase[1], testcase[2]);
-				var message = testcase[0]+"('"+testcase[1]+"', '"+testcase[2]+"')";
-				same(actual, testcase[3], message)
+				same(actual, testcase[3], name);
 			}
 		}
-	)(operator_tests[i]));
+	)(testcase, name));
 }

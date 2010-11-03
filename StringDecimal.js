@@ -69,10 +69,23 @@ var StringDecimal = (function(){
 		}
 	}
 
+	o._match_leading = function(a, b) {
+		if (a.exponent != b.exponent) {
+			throw "Can't match leading with different exponents";
+		}
+		while (a.mantissa.length > b.mantissa.length) {
+			b.mantissa.unshift(0);
+		}
+		while (b.mantissa.length > a.mantissa.length) {
+			a.mantissa.unshift(0);
+		}
+	}
+
 	o.add = function(raw_a, raw_b) {
 		var a = o._parse(raw_a);
 		var b = o._parse(raw_b);
 		o._match_exponents(a, b);
+		o._match_leading(a, b);
 		var c = {
 			'sign': '+',
 			'mantissa': o._array_add(a.mantissa, b.mantissa),
