@@ -160,5 +160,11 @@ var StringDecimal = (function(){
 		return o._format(o._strip_leading(sum));
 	};
 
+	o.subtract = function(raw_a, raw_b) {
+		var b = o._parse(raw_b);
+		b.sign = (b.sign == "-") ? "+" : "-";
+		return o.add(raw_a, o._format(b));
+	}
+
 	return o;
 })();
