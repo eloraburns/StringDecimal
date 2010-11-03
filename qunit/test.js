@@ -35,6 +35,12 @@ test("_array_negate", function() {
 	same(StringDecimal._array_negate([1, 2]), [-1, -2], "negated one two is negative one negative two");
 });
 
+test("_array_fill", function() {
+	same(StringDecimal._array_fill(0, 0), [], "empty array");
+	same(StringDecimal._array_fill(1, 0), [0], "a zero");
+	same(StringDecimal._array_fill(2, 0), [0, 0], "two zeros");
+});
+
 test("_parse", function() {
 	same(StringDecimal._parse("0"), {
 		'sign': '+',

@@ -17,6 +17,14 @@ var StringDecimal = (function(){
 		return result;
 	};
 
+	o._array_fill = function(length, value) {
+		var result = [];
+		while (length--) {
+			result.push(value);
+		}
+		return result;
+	}
+
 	/*
 	 * Parses a string into a sign, mantissa, and exponent.
 	 * Note that the exponent is actually the _negative_ power
@@ -124,10 +132,16 @@ var StringDecimal = (function(){
 					'mantissa': o._carry(o._array_add(a.mantissa, o._array_negate(b.mantissa))),
 					'exponent': a.exponent
 				}
-			} else {
+			} else if (a.mantissa < b.mantissa) {
 				sum = {
 					'sign': '-',
 					'mantissa': o._carry(o._array_add(o._array_negate(a.mantissa), b.mantissa)),
+					'exponent': a.exponent
+				}
+			} else {
+				sum = {
+					'sign': '+',
+					'mantissa': o._array_fill(a.mantissa.length, 0),
 					'exponent': a.exponent
 				}
 			}
@@ -138,10 +152,16 @@ var StringDecimal = (function(){
 					'mantissa': o._carry(o._array_add(a.mantissa, o._array_negate(b.mantissa))),
 					'exponent': a.exponent
 				}
-			} else {
+			} else if (a.mantissa < b.mantissa) {
 				sum = {
 					'sign': '+',
 					'mantissa': o._carry(o._array_add(o._array_negate(a.mantissa), b.mantissa)),
+					'exponent': a.exponent
+				}
+			} else {
+				sum = {
+					'sign': '+',
+					'mantissa': o._array_fill(a.mantissa.length, 0),
 					'exponent': a.exponent
 				}
 			}
