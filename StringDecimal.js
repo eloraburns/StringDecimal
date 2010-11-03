@@ -137,7 +137,7 @@ var StringDecimal = (function(){
 				'exponent': a.exponent
 			}
 		} else {
-			// You, too, can run the test to convince yourself that this is correct. :)
+			// You, too, can run the tests to convince yourself that this is correct. :)
 			if (a.mantissa > b.mantissa) {
 				sum = {
 					'sign': a.sign,
