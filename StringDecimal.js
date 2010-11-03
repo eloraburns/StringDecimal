@@ -118,18 +118,32 @@ var StringDecimal = (function(){
 				'exponent': a.exponent
 			}
 		} else if (a.sign == '+' && b.sign == '-') {
-			// WRONG
-			sum = {
-				'sign': a.sign,
-				'mantissa': o._carry(o._array_add(a.mantissa, b.mantissa)),
-				'exponent': a.exponent
+			if (a.mantissa > b.mantissa) {
+				sum = {
+					'sign': '+',
+					'mantissa': o._carry(o._array_add(a.mantissa, o._array_negate(b.mantissa))),
+					'exponent': a.exponent
+				}
+			} else {
+				sum = {
+					'sign': '-',
+					'mantissa': o._carry(o._array_add(o._array_negate(a.mantissa), b.mantissa)),
+					'exponent': a.exponent
+				}
 			}
 		} else if (a.sign == '-' && b.sign == '+') {
-			// WRONG
-			sum = {
-				'sign': a.sign,
-				'mantissa': o._carry(o._array_add(a.mantissa, b.mantissa)),
-				'exponent': a.exponent
+			if (a.mantissa > b.mantissa) {
+				sum = {
+					'sign': '-',
+					'mantissa': o._carry(o._array_add(a.mantissa, o._array_negate(b.mantissa))),
+					'exponent': a.exponent
+				}
+			} else {
+				sum = {
+					'sign': '+',
+					'mantissa': o._carry(o._array_add(o._array_negate(a.mantissa), b.mantissa)),
+					'exponent': a.exponent
+				}
 			}
 		}
 		return o._format(sum);
