@@ -181,6 +181,14 @@ test('_match_leading', function() {
 	same(a.exponent, b.exponent);
 });
 
+test("_carry", function() {
+	same(StringDecimal._carry([0]), [0], "zero");
+	same(StringDecimal._carry([1]), [1], "one");
+	same(StringDecimal._carry([9]), [9], "nine");
+	same(StringDecimal._carry([1, 0]), [1, 0], "one zero");
+	same(StringDecimal._carry([10]), [1, 0], "ten");
+});
+
 /* Copied directly from tests.json */
 var operator_tests = [
 	["add", "0", "0", "0"],
@@ -228,7 +236,8 @@ var operator_tests = [
 	["add", "-1", "2.0", "1.0"],
 
 	["add", "1", "10", "11"],
-	["add", "1", "19", "20"]
+	["add", "1", "19", "20"],
+	["add", "19", "9", "28"]
 ];
 
 for (var i = 0; i < operator_tests.length; i++) {

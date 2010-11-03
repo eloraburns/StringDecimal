@@ -4,7 +4,7 @@ var StringDecimal = (function(){
 	o._string_to_array = function(str) {
 		var result = [];
 		for (var i = 0; i < str.length; i++) {
-			result.push(parseInt(str[i]));
+			result.push(parseInt(str[i], 10));
 		}
 		return result;
 	}
@@ -81,6 +81,22 @@ var StringDecimal = (function(){
 		}
 	}
 
+	o._carry = function(arr) {
+		var carry = 0;
+		var result = [];
+		var current = 0;
+		for (var i = arr.length-1; i >= 0; i--) {
+			current = arr[i] + carry;
+			carry = Math.floor(current / 10);
+			result.push(Math.round(current % 10));
+		}
+		if (carry > 0) {
+			result.push(carry);
+		}
+		result.reverse()
+		return result;
+	}
+
 	o.add = function(raw_a, raw_b) {
 		var a = o._parse(raw_a);
 		var b = o._parse(raw_b);
@@ -88,7 +104,7 @@ var StringDecimal = (function(){
 		o._match_leading(a, b);
 		var c = {
 			'sign': '+',
-			'mantissa': o._array_add(a.mantissa, b.mantissa),
+			'mantissa': o._carry(o._array_add(a.mantissa, b.mantissa)),
 			'exponent': a.exponent
 		}
 		return o._format(c);
