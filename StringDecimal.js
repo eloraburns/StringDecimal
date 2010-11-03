@@ -167,5 +167,30 @@ var StringDecimal = (function(){
 		return o.add(raw_a, o._format(b));
 	}
 
+	o.multiply = function(raw_a, raw_b) {
+		var a = o._parse(raw_a);
+		var b = o._parse(raw_b);
+		var product = {};
+		if (a.sign == b.sign) {
+			product.sign = '+';
+		} else {
+			product.sign = '-';
+		}
+		var rfiller = o._array_fill(b.mantissa.length-1, 0);
+		var lfiller = [];
+		var addends = [];
+		for (var i = 0; i < b.mantissa.length; i++) {
+			addends.push(lfiller.concat(o._array_multiply(a.mantissa, b.mantissa[i]).concat(rfiller)));
+			lfiller.push(rfiller.pop());
+		}
+		var acc = addends.pop();
+		while (addends.length) {
+			acc = o._array_add(acc, addends.pop());
+		}
+		product.mantissa = o._carry(acc);
+		product.exponent = a.exponent + b.exponent;
+		return o._format(o._strip_leading(product));
+	}
+
 	return o;
 })();
