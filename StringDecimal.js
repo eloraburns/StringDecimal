@@ -135,36 +135,17 @@ var StringDecimal = (function(){
 				'mantissa': o._carry(o._array_add(a.mantissa, b.mantissa)),
 				'exponent': a.exponent
 			}
-		} else if (a.sign == '+' && b.sign == '-') {
+		} else {
+			// You, too, can run the test to convince yourself that this is correct. :)
 			if (a.mantissa > b.mantissa) {
 				sum = {
-					'sign': '+',
+					'sign': a.sign,
 					'mantissa': o._carry(o._array_add(a.mantissa, o._array_negate(b.mantissa))),
 					'exponent': a.exponent
 				}
 			} else if (a.mantissa < b.mantissa) {
 				sum = {
-					'sign': '-',
-					'mantissa': o._carry(o._array_add(o._array_negate(a.mantissa), b.mantissa)),
-					'exponent': a.exponent
-				}
-			} else {
-				sum = {
-					'sign': '+',
-					'mantissa': o._array_fill(a.mantissa.length, 0),
-					'exponent': a.exponent
-				}
-			}
-		} else if (a.sign == '-' && b.sign == '+') {
-			if (a.mantissa > b.mantissa) {
-				sum = {
-					'sign': '-',
-					'mantissa': o._carry(o._array_add(a.mantissa, o._array_negate(b.mantissa))),
-					'exponent': a.exponent
-				}
-			} else if (a.mantissa < b.mantissa) {
-				sum = {
-					'sign': '+',
+					'sign': b.sign,
 					'mantissa': o._carry(o._array_add(o._array_negate(a.mantissa), b.mantissa)),
 					'exponent': a.exponent
 				}
