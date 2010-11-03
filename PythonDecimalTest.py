@@ -1,8 +1,10 @@
-from decimal import Decimal
+from decimal import Decimal, getcontext
 import json
 
 with open('tests.json') as f:
     tests = json.loads(f.read())
+
+getcontext().prec = 100
 
 for operation, op1, op2, expected in tests:
     if operation == 'add':

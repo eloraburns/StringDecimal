@@ -97,6 +97,13 @@ var StringDecimal = (function(){
 		}
 	};
 
+	o._strip_leading = function(a) {
+		while (a.mantissa.length-1 > a.exponent && a.mantissa[0] == 0) {
+			a.mantissa.shift();
+		}
+		return a;
+	}
+
 	o._carry = function(arr) {
 		var carry = 0;
 		var result = [];
@@ -104,6 +111,9 @@ var StringDecimal = (function(){
 		for (var i = arr.length-1; i >= 0; i--) {
 			current = arr[i] + carry;
 			carry = Math.floor(current / 10);
+			while (current < 0) {
+				current += 10;
+			}
 			result.push(Math.round(current % 10));
 		}
 		if (carry > 0) {
@@ -166,7 +176,7 @@ var StringDecimal = (function(){
 				}
 			}
 		}
-		return o._format(sum);
+		return o._format(o._strip_leading(sum));
 	};
 
 	return o;

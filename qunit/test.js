@@ -200,6 +200,39 @@ test('_match_leading', function() {
 	same(a.exponent, b.exponent);
 });
 
+test("_strip_leading", function() {
+	var base = {
+		'sign': '+',
+		'mantissa': [0],
+		'exponent': 0
+	};
+
+	var a = copy_StringDecimal(base);
+	var b = copy_StringDecimal(base);
+	same(StringDecimal._strip_leading(a), b, "zero to zero");
+
+	var a = copy_StringDecimal(base);
+	a.mantissa = [0, 0];
+	var b = copy_StringDecimal(base);
+	same(StringDecimal._strip_leading(a), b, "zerozero to zero");
+
+	var a = copy_StringDecimal(base);
+	a.mantissa = [0, 0];
+	a.exponent = 1;
+	var b = copy_StringDecimal(base);
+	b.mantissa = [0, 0];
+	b.exponent = 1;
+	same(StringDecimal._strip_leading(a), b, "zero.zero to zero.zero");
+
+	var a = copy_StringDecimal(base);
+	a.mantissa = [0, 1, 0];
+	a.exponent = 1;
+	var b = copy_StringDecimal(base);
+	b.mantissa = [1, 0];
+	b.exponent = 1;
+	same(StringDecimal._strip_leading(a), b, "zerozero.zero to zero.zero");
+});
+
 test("_carry", function() {
 	same(StringDecimal._carry([0]), [0], "zero");
 	same(StringDecimal._carry([1]), [1], "one");
@@ -240,6 +273,8 @@ var operator_tests = [
 	["add", "0", "-1.0", "-1.0"],
 	["add", "2", "-1.0", "1.0"],
 	["add", "1", "-2.0", "-1.0"],
+	["add", "10", "-1", "9"],
+	["add", "1", "-10", "-9"],
 
 	["add", "-1", "1", "0"],
 	["add", "-0", "1", "1"],
@@ -253,6 +288,8 @@ var operator_tests = [
 	["add", "-0", "1.0", "1.0"],
 	["add", "-2", "1.0", "-1.0"],
 	["add", "-1", "2.0", "1.0"],
+	["add", "-10", "1", "-9"],
+	["add", "-1", "10", "9"],
 
 	["add", "-1", "-1", "-2"],
 	["add", "-10", "-1", "-11"],
@@ -260,7 +297,11 @@ var operator_tests = [
 
 	["add", "1", "10", "11"],
 	["add", "1", "19", "20"],
-	["add", "19", "9", "28"]
+	["add", "19", "9", "28"],
+
+	["add", "3.1415926535898", "2.718281828", "5.8598744815898"],
+	["add", "1000000000000000", "0.0000000000000001", "1000000000000000.0000000000000001"],
+	["add", "1000000000000000", "-0.0000000000000001", "999999999999999.9999999999999999"]
 ];
 
 for (var i = 0; i < operator_tests.length; i++) {
