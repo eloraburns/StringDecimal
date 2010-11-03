@@ -100,14 +100,31 @@ var StringDecimal = (function(){
 	o.add = function(raw_a, raw_b) {
 		var a = o._parse(raw_a);
 		var b = o._parse(raw_b);
+		var sum;
 		o._match_exponents(a, b);
 		o._match_leading(a, b);
-		var c = {
-			'sign': '+',
-			'mantissa': o._carry(o._array_add(a.mantissa, b.mantissa)),
-			'exponent': a.exponent
+		if (a.sign == b.sign) {
+			sum = {
+				'sign': a.sign,
+				'mantissa': o._carry(o._array_add(a.mantissa, b.mantissa)),
+				'exponent': a.exponent
+			}
+		} else if (a.sign == '+' && b.sign == '-') {
+			// WRONG
+			sum = {
+				'sign': a.sign,
+				'mantissa': o._carry(o._array_add(a.mantissa, b.mantissa)),
+				'exponent': a.exponent
+			}
+		} else if (a.sign == '-' && b.sign == '+') {
+			// WRONG
+			sum = {
+				'sign': a.sign,
+				'mantissa': o._carry(o._array_add(a.mantissa, b.mantissa)),
+				'exponent': a.exponent
+			}
 		}
-		return o._format(c);
+		return o._format(sum);
 	};
 
 	
