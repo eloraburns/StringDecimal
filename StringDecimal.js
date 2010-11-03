@@ -58,6 +58,14 @@ var StringDecimal = (function(){
 		return result;
 	};
 
+	o._array_negate = function(arr) {
+		var result = [];
+		for (var i = 0; i < arr.length; i++) {
+			result.push(-arr[i]);
+		}
+		return result;
+	};
+
 	o._match_exponents = function(a, b) {
 		while (a.exponent > b.exponent) {
 			b.exponent++;

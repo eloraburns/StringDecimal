@@ -22,6 +22,19 @@ test("_array_to_string", function() {
 	same(StringDecimal._array_to_string([1, 9, 2, 8, 3, 7, 4, 6, 5, 0]), "1928374650", "pandigital");
 });
 
+test("_array_add", function() {
+	same(StringDecimal._array_add([0], [0]), [0], "zero plus zero is zero");
+	same(StringDecimal._array_add([1], [1]), [2], "one plus one is two");
+	same(StringDecimal._array_add([1, 0], [2, 4]), [3, 4], "one zero plus two four is three four");
+	same(StringDecimal._array_add([9], [1]), [10], "nine plus one is ten");
+});
+
+test("_array_negate", function() {
+	same(StringDecimal._array_negate([0]), [0], "negated zero is zero");
+	same(StringDecimal._array_negate([1]), [-1], "negated one is negative one");
+	same(StringDecimal._array_negate([1, 2]), [-1, -2], "negated one two is negative one negative two");
+});
+
 test("_parse", function() {
 	same(StringDecimal._parse("0"), {
 		'sign': '+',
