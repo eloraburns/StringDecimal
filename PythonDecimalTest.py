@@ -15,6 +15,6 @@ for operation, op1, op2, expected in tests:
         print "'%s' NOT IMPLEMENTED" % operation
 
     try:
-        assert expected == actual, "%s('%s', '%s') expected %s, actual %s" % (operation, op1, op2, expected, actual)
+        assert expected == actual, "%s('%s', '%s') expected '%s', actual '%s'" % (operation, op1, op2, expected, actual)
     except AssertionError as e:
         print e
