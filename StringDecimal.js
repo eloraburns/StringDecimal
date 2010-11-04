@@ -225,5 +225,9 @@ var StringDecimal = (function(){
 		return o._format(a);
 	}
 
+	o.divide = function(raw_a, raw_b, places) {
+		return raw_a;
+	}
+
 	return o;
 })();
