@@ -176,6 +176,17 @@ var StringDecimal = (function(){
 		} else {
 			product.sign = '-';
 		}
+		// This is just like in elementary school
+		//   1 2
+		// * 3 4
+		// -----
+		//   4 8
+		// 3 6
+		// -----
+		// 4 0 8
+		// Except that rfiller and lfiller put zeros in the spaces so we can just add everything together.
+		// _carry() happily takes very large values to carry, and we shouldn't ever need more than the one
+		// extra digit _carry() will give us at the end.
 		var rfiller = o._array_fill(b.mantissa.length-1, 0);
 		var lfiller = [];
 		var addends = [];
