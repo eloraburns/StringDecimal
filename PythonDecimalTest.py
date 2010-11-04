@@ -15,6 +15,8 @@ for operation, op1, op2, expected in tests:
         actual = str(Decimal(op1) - Decimal(op2))
     elif operation == 'multiply':
         actual = str(Decimal(op1) * Decimal(op2))
+    elif operation == 'round':
+        actual = str(Decimal(op1).quantize(Decimal("1E-%s" % op2)))
     else:
         print "'%s' NOT IMPLEMENTED" % operation
 

@@ -203,5 +203,27 @@ var StringDecimal = (function(){
 		return o._format(o._strip_leading(product));
 	}
 
+	o.round = function(raw_a, places) {
+		var a = o._parse(raw_a);
+		if (a.exponent > places) {
+			while (a.exponent > places+1) {
+				a.exponent--;
+				a.mantissa.pop();
+			}
+			a.exponent--;
+			var rounding_digit = a.mantissa.pop();
+			if (rounding_digit >= 5) {
+				a.mantissa[a.mantissa.length-1]++;
+				a.mantissa = o._carry(a.mantissa);
+			}
+		} else {
+			while (a.exponent < places) {
+				a.exponent++;
+				a.mantissa.push(0);
+			}
+		}
+		return o._format(a);
+	}
+
 	return o;
 })();
