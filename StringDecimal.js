@@ -247,8 +247,11 @@ var StringDecimal = {
 		// extra digit _carry() will give us at the end.
 		var addends = this._produce_addends(a.mantissa, b.mantissa);
 		var acc = addends.pop();
-		while (addends.length) {
-			acc = this._array_add(acc, addends.pop());
+		var next;
+		while (next = addends.pop()) {
+			for (var i = 0; i < acc.length; i++) {
+				acc[i] += next[i];
+			}
 		}
 		product.mantissa = this._carry(acc);
 		product.exponent = a.exponent + b.exponent;
