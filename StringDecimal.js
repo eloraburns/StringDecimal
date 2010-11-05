@@ -85,9 +85,9 @@ var StringDecimal = {
 		if (a.length != b.length) {
 			throw "Arrays of dissimilar length cannot be added";
 		}
-		var result = [];
+		var result = new Array(a.length);
 		for (var i = 0; i < a.length; i++) {
-			result.push(a[i] + b[i]);
+			result[i] = a[i] + b[i];
 		}
 		return result;
 	},
