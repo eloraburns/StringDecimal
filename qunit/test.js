@@ -258,16 +258,20 @@ test("_all_zero", function() {
 
 for (var i = 0; i < operator_tests.length; i++) {
 	var testcase = operator_tests[i];
-	var name = testcase[0]+"('"+testcase[1]+"', '"+testcase[2]+"')";
+	var methodname = testcase[0];
+	var testargs = testcase.slice(1,-1);
+	var expected = testcase[testcase.length-1];
+	var name = testcase[0]+"('" + testargs[0] + "'";
+	for (var j = 1; j < testargs.length; j++) {
+		name = name.concat(", '", testargs[j], "'");
+	}
+	name = name.concat(")");
 	test("operator_tests case "+name, 1, (
-		function(testcase, name) {
+		function(testcase, name, methodname, testargs, expected) {
 			return function() {
-				var methodname = testcase[0];
-				var testargs = testcase.slice(1,-1);
-				var expected = testcase[testcase.length-1];
 				var actual = StringDecimal[methodname].apply(null, testargs);
 				same(actual, expected, name);
 			}
 		}
-	)(testcase, name));
+	)(testcase, name, methodname, testargs, expected));
 }
