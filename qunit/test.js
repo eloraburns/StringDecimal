@@ -262,7 +262,7 @@ for (var i = 0; i < operator_tests.length; i++) {
 	test("operator_tests case "+name, 1, (
 		function(testcase, name, methodname, testargs, expected) {
 			return function() {
-				var actual = StringDecimal[methodname].apply(null, testargs);
+				var actual = StringDecimal[methodname].apply(StringDecimal, testargs);
 				same(actual, expected, name);
 			}
 		}

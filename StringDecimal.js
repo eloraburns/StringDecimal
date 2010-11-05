@@ -46,14 +46,14 @@ var StringDecimal = {
 		var exponent = fractional.length;
 		return {
 			'sign': sign,
-			'mantissa': StringDecimal._string_to_array(mantissa_as_a_string),
+			'mantissa': this._string_to_array(mantissa_as_a_string),
 			'exponent': exponent
 		};
 	},
 
 	_format: function(obj) {
 		var sign = (obj.sign == "-") ? "-" : "";
-		var mantissa = StringDecimal._array_to_string(obj.mantissa);
+		var mantissa = this._array_to_string(obj.mantissa);
 		var decimal_point = (obj.exponent > 0) ? "." : "";
 		var decimal_point_offset = mantissa.length - obj.exponent;
 		return sign +
@@ -131,15 +131,15 @@ var StringDecimal = {
 	},
 
 	add: function(raw_a, raw_b) {
-		var a = StringDecimal._parse(raw_a);
-		var b = StringDecimal._parse(raw_b);
+		var a = this._parse(raw_a);
+		var b = this._parse(raw_b);
 		var sum;
-		StringDecimal._match_exponents(a, b);
-		StringDecimal._match_leading(a, b);
+		this._match_exponents(a, b);
+		this._match_leading(a, b);
 		if (a.sign == b.sign) {
 			sum = {
 				'sign': a.sign,
-				'mantissa': StringDecimal._carry(StringDecimal._array_add(a.mantissa, b.mantissa)),
+				'mantissa': this._carry(this._array_add(a.mantissa, b.mantissa)),
 				'exponent': a.exponent
 			};
 		} else {
@@ -147,35 +147,35 @@ var StringDecimal = {
 			if (a.mantissa > b.mantissa) {
 				sum = {
 					'sign': a.sign,
-					'mantissa': StringDecimal._carry(StringDecimal._array_add(a.mantissa, StringDecimal._array_multiply(b.mantissa, -1))),
+					'mantissa': this._carry(this._array_add(a.mantissa, this._array_multiply(b.mantissa, -1))),
 					'exponent': a.exponent
 				};
 			} else if (a.mantissa < b.mantissa) {
 				sum = {
 					'sign': b.sign,
-					'mantissa': StringDecimal._carry(StringDecimal._array_add(StringDecimal._array_multiply(a.mantissa, -1), b.mantissa)),
+					'mantissa': this._carry(this._array_add(this._array_multiply(a.mantissa, -1), b.mantissa)),
 					'exponent': a.exponent
 				};
 			} else {
 				sum = {
 					'sign': '+',
-					'mantissa': StringDecimal._array_fill(a.mantissa.length, 0),
+					'mantissa': this._array_fill(a.mantissa.length, 0),
 					'exponent': a.exponent
 				};
 			}
 		}
-		return StringDecimal._format(StringDecimal._strip_leading(sum));
+		return this._format(this._strip_leading(sum));
 	},
 
 	subtract: function(raw_a, raw_b) {
-		var b = StringDecimal._parse(raw_b);
+		var b = this._parse(raw_b);
 		b.sign = (b.sign == "-") ? "+" : "-";
-		return StringDecimal.add(raw_a, StringDecimal._format(b));
+		return this.add(raw_a, this._format(b));
 	},
 
 	multiply: function(raw_a, raw_b) {
-		var a = StringDecimal._parse(raw_a);
-		var b = StringDecimal._parse(raw_b);
+		var a = this._parse(raw_a);
+		var b = this._parse(raw_b);
 		var product = {};
 		if (a.sign == b.sign) {
 			product.sign = '+';
@@ -193,25 +193,25 @@ var StringDecimal = {
 		// Except that rfiller and lfiller put zeros in the spaces so we can just add everything together.
 		// _carry() happily takes very large values to carry, and we shouldn't ever need more than the one
 		// extra digit _carry() will give us at the end.
-		var rfiller = StringDecimal._array_fill(b.mantissa.length-1, 0);
+		var rfiller = this._array_fill(b.mantissa.length-1, 0);
 		var lfiller = [];
 		var addends = [];
 		for (var i = 0; i < b.mantissa.length; i++) {
-			addends.push(lfiller.concat(StringDecimal._array_multiply(a.mantissa, b.mantissa[i]).concat(rfiller)));
+			addends.push(lfiller.concat(this._array_multiply(a.mantissa, b.mantissa[i]).concat(rfiller)));
 			lfiller.push(rfiller.pop());
 		}
 		var acc = addends.pop();
 		while (addends.length) {
-			acc = StringDecimal._array_add(acc, addends.pop());
+			acc = this._array_add(acc, addends.pop());
 		}
-		product.mantissa = StringDecimal._carry(acc);
+		product.mantissa = this._carry(acc);
 		product.exponent = a.exponent + b.exponent;
-		return StringDecimal._format(StringDecimal._strip_leading(product));
+		return this._format(this._strip_leading(product));
 	},
 
 	round: function(raw_a, places) {
 		var integer_places = parseInt(places, 10);
-		var a = StringDecimal._parse(raw_a);
+		var a = this._parse(raw_a);
 		if (a.exponent > integer_places) {
 			while (a.exponent > integer_places+1) {
 				a.exponent--;
@@ -221,7 +221,7 @@ var StringDecimal = {
 			var rounding_digit = a.mantissa.pop();
 			if (rounding_digit >= 5) {
 				a.mantissa[a.mantissa.length-1]++;
-				a.mantissa = StringDecimal._carry(a.mantissa);
+				a.mantissa = this._carry(a.mantissa);
 			}
 		} else {
 			while (a.exponent < integer_places) {
@@ -229,7 +229,7 @@ var StringDecimal = {
 				a.mantissa.push(0);
 			}
 		}
-		return StringDecimal._format(a);
+		return this._format(a);
 	},
 
 	_all_zero: function(a) {
@@ -242,13 +242,13 @@ var StringDecimal = {
 	},
 
 	divide: function(raw_a, raw_b, places) {
-		var a = StringDecimal._parse(raw_a);
-		var b = StringDecimal._strip_leading(StringDecimal._parse(raw_b));
+		var a = this._parse(raw_a);
+		var b = this._strip_leading(this._parse(raw_b));
 		var internal_places = parseInt(places, 10) + 2;
 		var result_places = parseInt(places, 10);
 		var shift_places = 0;
 
-		if (StringDecimal._all_zero(b.mantissa)) {
+		if (this._all_zero(b.mantissa)) {
 			return "NaN";
 		}
 
@@ -256,8 +256,8 @@ var StringDecimal = {
 		a.sign = '+';
 		b.sign = '+';
 
-		if (StringDecimal._all_zero(a.mantissa)) {
-			return StringDecimal.round(dividend_sign + '0', result_places);
+		if (this._all_zero(a.mantissa)) {
+			return this.round(dividend_sign + '0', result_places);
 		}
 
 		// If b's length is larger than its exponent+1, then we'll
@@ -279,21 +279,21 @@ var StringDecimal = {
 
 		// Now we have some a, and 0 < b < 1
 		// Let's start approximating (http://en.wikipedia.org/wiki/Division_(digital)#Goldschmidt_division)!
-		var full_a = StringDecimal._format(StringDecimal._strip_leading(a));
-		var full_b = StringDecimal._format(StringDecimal._strip_leading(b));
-		var new_a = StringDecimal.round(full_a, internal_places);
+		var full_a = this._format(this._strip_leading(a));
+		var full_b = this._format(this._strip_leading(b));
+		var new_a = this.round(full_a, internal_places);
 		var old_a;
 		var factor;
 		do {
 			old_a = new_a;
-			factor = StringDecimal.subtract("2", full_b);
-			full_a = StringDecimal.round(StringDecimal.multiply(full_a, factor), raw_a.length+raw_b.length+internal_places);
-			full_b = StringDecimal.round(StringDecimal.multiply(full_b, factor), raw_a.length+raw_b.length+internal_places);
-			new_a = StringDecimal.round(full_a, internal_places);
+			factor = this.subtract("2", full_b);
+			full_a = this.round(this.multiply(full_a, factor), raw_a.length+raw_b.length+internal_places);
+			full_b = this.round(this.multiply(full_b, factor), raw_a.length+raw_b.length+internal_places);
+			new_a = this.round(full_a, internal_places);
 		} while (new_a != old_a);
 
-		var answer = StringDecimal._parse(new_a);
+		var answer = this._parse(new_a);
 		answer.sign = dividend_sign;
-		return StringDecimal.round(StringDecimal._format(answer), result_places);
+		return this.round(this._format(answer), result_places);
 	}
 };
