@@ -240,10 +240,58 @@ var StringDecimal = {
 		return true;
 	},
 
-	o.divide = function(raw_a, raw_b, places) {
-		return raw_a;
-	}
+	divide: function(raw_a, raw_b, places) {
+		var a = StringDecimal._parse(raw_a);
+		var b = StringDecimal._strip_leading(StringDecimal._parse(raw_b));
+		var shift_places = 0;
 
-	return o;
-})();
+		if (StringDecimal._all_zero(b.mantissa)) {
+			return "NaN";
+		}
+
+		var dividend_sign = (a.sign == b.sign) ? '+' : '-';
+		a.sign = '+';
+		b.sign = '+';
+
+		// If b's length is larger than its exponent+1, then we'll
+		// have to divide by 10 a few times to get it to 0 < b < 1
+		if (b.mantissa.length > b.exponent+1) {
+			shift_places = b.mantissa.length - b.exponent;
+		} else if (b.mantissa[0] > 0) {
+			// Just have to shift it one place
+			shift_places = 1;
+		}
+		// Make sure we have a zero in place for b
+		b.mantissa.unshift(0);
+		while (shift_places > 0) {
+			a.exponent++;
+			a.mantissa.unshift(0);
+			b.exponent++;
+			shift_places--;
+		}
+
+		// Now we have some a, and 0 < b < 1
+		// Let's start approximating (http://en.wikipedia.org/wiki/Division_(digital)#Goldschmidt_division)!
+		var full_a = StringDecimal._format(StringDecimal._strip_leading(a));
+		var full_b = StringDecimal._format(StringDecimal._strip_leading(b));
+		console.log(full_a + " divided by " + full_b);
+		var new_a = StringDecimal.round(full_a, places);
+		var old_a;
+		var factor;
+		do {
+			old_a = new_a;
+			factor = StringDecimal.subtract("2", full_b);
+			console.log("FACTOR " + factor);
+			full_a = StringDecimal.multiply(full_a, factor);
+			full_b = StringDecimal.multiply(full_b, factor);
+			console.log("PLACES " + places);
+			console.log("FULL A " + full_a);
+			new_a = StringDecimal.round(full_a, places);
+			console.log("NEW A " + new_a);
+		} while (new_a != old_a);
+
+		var answer = StringDecimal._parse(new_a);
+		answer.sign = dividend_sign;
+		return StringDecimal._format(answer);
+	}
 };
