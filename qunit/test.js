@@ -1,4 +1,3 @@
-
 test("_string_to_array", function() {
 	same(StringDecimal._string_to_array("0"), [0], "zero");
 	same(StringDecimal._string_to_array("1"), [1], "one");
@@ -33,6 +32,13 @@ test("_array_fill", function() {
 	same(StringDecimal._array_fill(0, 0), [], "empty array");
 	same(StringDecimal._array_fill(1, 0), [0], "a zero");
 	same(StringDecimal._array_fill(2, 0), [0, 0], "two zeros");
+});
+
+test("_produce_addends", function() {
+	same(StringDecimal._produce_addends([1], [1]), [[1]], "[1], [1]");
+	same(StringDecimal._produce_addends([1], [1, 2]), [[1, 0], [0, 2]], "[1], [1, 2]");
+	same(StringDecimal._produce_addends([1, 2], [1]), [[1, 2]], "[1, 2], [1]");
+	same(StringDecimal._produce_addends([1, 2], [3, 4]), [[3, 6, 0], [0, 4, 8]], "[1, 2], [3, 4]");
 });
 
 test("_parse", function() {
@@ -289,3 +295,4 @@ for (var i = 0; i < operator_tests.length; i++) {
 		}
 	)(testcase, name, methodname, testargs, expected));
 }
+

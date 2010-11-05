@@ -192,6 +192,39 @@ var StringDecimal = {
 		return this.add(raw_a, this._format(b));
 	},
 
+	_produce_addends: function(a, b) {
+		var rfiller = this._array_fill(b.length-1, 0);
+		var lfiller = [];
+		var addends = [];
+		for (var i = 0; i < b.length; i++) {
+			addends.push(lfiller.concat(this._array_multiply(a, b[i]).concat(rfiller)));
+			lfiller.push(rfiller.pop());
+		}
+		return addends;
+
+		// Slightly (~10%) slower on firefox
+		// var addends = new Array(b.length);
+		// var addend_width = a.length + b.length - 1;
+		// var multiplied;
+		// var addend;
+		// for (var i = 0; i < b.length; i++) {
+		// 	addend = new Array(addend_width);
+		// 	for (var k = 0; k < i; k++) {
+		// 		addend[k] = 0;
+		// 	}
+		// 	multiplied = this._array_multiply(a, b[i]);
+		// 	for (var j = 0; j < multiplied.length; j++) {
+		// 		addend[i+j] = multiplied[j];
+		// 	}
+		// 	for (k += multiplied.length; k < addend_width; k++) {
+		// 		addend[k] = 0;
+		// 	}
+		// 	addends[i] = addend;
+		// }
+		// return addends;
+
+	},
+
 	multiply: function(raw_a, raw_b) {
 		var a = this._parse(raw_a);
 		var b = this._parse(raw_b);
@@ -212,13 +245,7 @@ var StringDecimal = {
 		// Except that rfiller and lfiller put zeros in the spaces so we can just add everything together.
 		// _carry() happily takes very large values to carry, and we shouldn't ever need more than the one
 		// extra digit _carry() will give us at the end.
-		var rfiller = this._array_fill(b.mantissa.length-1, 0);
-		var lfiller = [];
-		var addends = [];
-		for (var i = 0; i < b.mantissa.length; i++) {
-			addends.push(lfiller.concat(this._array_multiply(a.mantissa, b.mantissa[i]).concat(rfiller)));
-			lfiller.push(rfiller.pop());
-		}
+		var addends = this._produce_addends(a.mantissa, b.mantissa);
 		var acc = addends.pop();
 		while (addends.length) {
 			acc = this._array_add(acc, addends.pop());
