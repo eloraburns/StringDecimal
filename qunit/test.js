@@ -1,10 +1,3 @@
-function copy_StringDecimal(a) {
-	return {
-		'sign': a.sign,
-		'mantissa': a.mantissa.slice(),
-		'exponent': a.exponent
-	}
-}
 
 test("_string_to_array", function() {
 	same(StringDecimal._string_to_array("0"), [0], "zero");
@@ -137,16 +130,16 @@ test("_match_exponents", function() {
 	};
 	var a, b;
 
-	a = copy_StringDecimal(base);
-	b = copy_StringDecimal(base);
+	a = StringDecimal._copy(base);
+	b = StringDecimal._copy(base);
 	StringDecimal._match_exponents(a, b);
 	same(a.mantissa, [0]);
 	same(a.exponent, 0);
 	same(a.mantissa, b.mantissa);
 	same(a.exponent, b.exponent);
 
-	a = copy_StringDecimal(base);
-	b = copy_StringDecimal(base);
+	a = StringDecimal._copy(base);
+	b = StringDecimal._copy(base);
 	a.mantissa = [0, 0];
 	a.exponent = 1;
 	StringDecimal._match_exponents(a, b);
@@ -155,8 +148,8 @@ test("_match_exponents", function() {
 	same(a.mantissa, b.mantissa);
 	same(a.exponent, b.exponent);
 
-	a = copy_StringDecimal(base);
-	b = copy_StringDecimal(base);
+	a = StringDecimal._copy(base);
+	b = StringDecimal._copy(base);
 	b.mantissa = [0, 0];
 	b.exponent = 1;
 	StringDecimal._match_exponents(a, b);
@@ -174,16 +167,16 @@ test('_match_leading', function() {
 	};
 	var a, b;
 
-	a = copy_StringDecimal(base);
-	b = copy_StringDecimal(base);
+	a = StringDecimal._copy(base);
+	b = StringDecimal._copy(base);
 	StringDecimal._match_leading(a, b);
 	same(a.mantissa, [0]);
 	same(a.exponent, 0);
 	same(a.mantissa, b.mantissa);
 	same(a.exponent, b.exponent);
 
-	a = copy_StringDecimal(base);
-	b = copy_StringDecimal(base);
+	a = StringDecimal._copy(base);
+	b = StringDecimal._copy(base);
 	a.mantissa = [0, 0];
 	StringDecimal._match_leading(a, b);
 	same(a.mantissa, [0, 0]);
@@ -191,8 +184,8 @@ test('_match_leading', function() {
 	same(a.mantissa, b.mantissa);
 	same(a.exponent, b.exponent);
 
-	a = copy_StringDecimal(base);
-	b = copy_StringDecimal(base);
+	a = StringDecimal._copy(base);
+	b = StringDecimal._copy(base);
 	b.mantissa = [0, 0];
 	StringDecimal._match_leading(a, b);
 	same(a.mantissa, [0, 0]);
@@ -208,27 +201,27 @@ test("_strip_leading", function() {
 		'exponent': 0
 	};
 
-	var a = copy_StringDecimal(base);
-	var b = copy_StringDecimal(base);
+	var a = StringDecimal._copy(base);
+	var b = StringDecimal._copy(base);
 	same(StringDecimal._strip_leading(a), b, "zero to zero");
 
-	var a = copy_StringDecimal(base);
+	var a = StringDecimal._copy(base);
 	a.mantissa = [0, 0];
-	var b = copy_StringDecimal(base);
+	var b = StringDecimal._copy(base);
 	same(StringDecimal._strip_leading(a), b, "zerozero to zero");
 
-	var a = copy_StringDecimal(base);
+	var a = StringDecimal._copy(base);
 	a.mantissa = [0, 0];
 	a.exponent = 1;
-	var b = copy_StringDecimal(base);
+	var b = StringDecimal._copy(base);
 	b.mantissa = [0, 0];
 	b.exponent = 1;
 	same(StringDecimal._strip_leading(a), b, "zero.zero to zero.zero");
 
-	var a = copy_StringDecimal(base);
+	var a = StringDecimal._copy(base);
 	a.mantissa = [0, 1, 0];
 	a.exponent = 1;
-	var b = copy_StringDecimal(base);
+	var b = StringDecimal._copy(base);
 	b.mantissa = [1, 0];
 	b.exponent = 1;
 	same(StringDecimal._strip_leading(a), b, "zerozero.zero to zero.zero");

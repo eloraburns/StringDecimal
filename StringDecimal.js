@@ -2,6 +2,14 @@
 var StringDecimal = (function(){
 	var o = {};
 
+	o._copy = function(a) {
+		return {
+			'sign': a.sign,
+			'mantissa': a.mantissa.slice(),
+			'exponent': a.exponent
+		}
+	}
+
 	o._string_to_array = function(str) {
 		var result = [];
 		for (var i = 0; i < str.length; i++) {
