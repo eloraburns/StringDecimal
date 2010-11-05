@@ -245,6 +245,15 @@ test("_carry", function() {
 	same(StringDecimal._carry([1,-1]), [0, 9], "one negative one");
 });
 
+test("_all_zero", function() {
+	same(StringDecimal._all_zero([]), true, "[]");
+	same(StringDecimal._all_zero([0]), true, "[0]");
+	same(StringDecimal._all_zero([1]), false, "[1]");
+	same(StringDecimal._all_zero([0, 1]), false, "[0, 1]");
+	same(StringDecimal._all_zero([1, 0]), false, "[1, 0]");
+	same(StringDecimal._all_zero([0, 0]), true, "[0, 0]");
+});
+
 /* operator_tests is included via HTML wholsale (from tests.json) */
 
 for (var i = 0; i < operator_tests.length; i++) {

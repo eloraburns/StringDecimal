@@ -223,7 +223,16 @@ var StringDecimal = (function(){
 			}
 		}
 		return o._format(a);
-	}
+	};
+
+	o._all_zero = function(a) {
+		for (var i = 0; i < a.length; i++) {
+			if (a[i] != 0) {
+				return false;
+			}
+		}
+		return true;
+	};
 
 	o.divide = function(raw_a, raw_b, places) {
 		return raw_a;
