@@ -39,16 +39,33 @@ var StringDecimal = {
 	 * value.  e.g. {mantissa: [1, 0], exponent: 1} => '1.0'
 	 */
 	_parse: function(str) {
-		var matches = str.match(/^(\+|-)?0*(\d+)(?:\.(\d+))?$/);
+		var matches = str.match(/^(\+|-)?0*(\d+)(?:\.(\d+))?(?:e((?:\+|-)?\d+))?$/i);
 		var sign = matches[1] || '+';
 		var fractional = (undefined === matches[3]) ? "" : matches[3];
 		var mantissa_as_a_string = matches[2] + fractional;
+		var adjust = (undefined === matches[4]) ? 0 : parseInt(matches[4]);
 		var exponent = fractional.length;
-		return {
+		var value = {
 			'sign': sign,
 			'mantissa': this._string_to_array(mantissa_as_a_string),
 			'exponent': exponent
 		};
+		while (adjust > 0) {
+			if (value.exponent > 0) {
+				value.exponent--;
+			} else {
+				value.mantissa.push(0);
+			}
+			adjust--;
+		}
+		while (adjust < 0) {
+			value.exponent++;
+			if (value.exponent >= value.mantissa.length) {
+				value.mantissa.unshift(0);
+			}
+			adjust++;
+		}
+		return value;
 	},
 
 	_format: function(obj) {

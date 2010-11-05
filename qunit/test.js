@@ -76,6 +76,27 @@ test("_parse", function() {
 		'mantissa': [1, 0],
 		'exponent': 1
 	}, "negative one point aught");
+	same(StringDecimal._parse("0e-1"), {
+		'sign': '+',
+		'mantissa': [0, 0],
+		'exponent': 1
+	}, "0e-1");
+	same(StringDecimal._parse("1e-1"), {
+		'sign': '+',
+		'mantissa': [0, 1],
+		'exponent': 1
+	}, "1e-1");
+	same(StringDecimal._parse("1e+1"), {
+		'sign': '+',
+		'mantissa': [1, 0],
+		'exponent': 0
+	}, "1e+1");
+	same(StringDecimal._parse("1e1"), {
+		'sign': '+',
+		'mantissa': [1, 0],
+		'exponent': 0
+	}, "1e1");
+
 });
 
 test("_format", function() {
