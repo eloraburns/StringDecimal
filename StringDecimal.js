@@ -93,9 +93,9 @@ var StringDecimal = {
 	},
 
 	_array_multiply: function(arr, n) {
-		var result = [];
+		var result = new Array(arr.length);
 		for (var i = 0; i < arr.length; i++) {
-			result.push(arr[i] * n);
+			result[i] = arr[i] * n;
 		}
 		return result;
 	},
