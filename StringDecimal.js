@@ -1,5 +1,7 @@
 /* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php */
 var StringDecimal = {
+	_divide_precision: 30,
+
 	_copy: function(a) {
 		return {
 			'sign': a.sign,
@@ -65,7 +67,7 @@ var StringDecimal = {
 			}
 			adjust++;
 		}
-		return value;
+		return this._strip_leading(value);
 	},
 
 	_format: function(obj) {
@@ -259,58 +261,56 @@ var StringDecimal = {
 	},
 
 	divide: function(raw_a, raw_b, places) {
+		// See http://en.wikipedia.org/wiki/Division_(digital)#Newton.E2.80.93Raphson_division
 		var a = this._parse(raw_a);
-		var b = this._strip_leading(this._parse(raw_b));
-		var internal_places = parseInt(places, 10) + 2;
-		var result_places = parseInt(places, 10);
-		var shift_places = 0;
+		var b = this._parse(raw_b);
 
 		if (this._all_zero(b.mantissa)) {
 			return "NaN";
 		}
-
-		var dividend_sign = (a.sign == b.sign) ? '+' : '-';
-		a.sign = '+';
-		b.sign = '+';
-
 		if (this._all_zero(a.mantissa)) {
-			return this.round(dividend_sign + '0', result_places);
+			return this.round(this._format({
+				'sign': (a.sign == b.sign) ? '+' : '-',
+				'mantissa': [0],
+				'exponent': 0
+			}), places);
 		}
 
-		// If b's length is larger than its exponent+1, then we'll
-		// have to divide by 10 a few times to get it to 0 < b < 1
-		if (b.mantissa.length > b.exponent+1) {
-			shift_places = b.mantissa.length - b.exponent;
-		} else if (b.mantissa[0] > 0) {
-			// Just have to shift it one place
-			shift_places = 1;
+		var adjust = 0;
+		while (b.mantissa[0] === 0) {
+			adjust++;
+			b.exponent--;
+			b.mantissa.shift();
 		}
-		// Make sure we have a zero in place for b
-		b.mantissa.unshift(0);
-		while (shift_places > 0) {
-			a.exponent++;
-			a.mantissa.unshift(0);
+		while (b.mantissa.length > b.exponent+1) {
+			adjust--;
 			b.exponent++;
-			shift_places--;
+		}
+		// Now the divisor is within [1,10]
+
+		var extra_factor = [1, 5, 3, 2, 2, 1, 1, 1, 1, 1][b.mantissa[0]];
+		if (b.sign == '-') {
+			extra_factor *= -1;
 		}
 
-		// Now we have some a, and 0 < b < 1
-		// Let's start approximating (http://en.wikipedia.org/wiki/Division_(digital)#Goldschmidt_division)!
-		var full_a = this._format(this._strip_leading(a));
-		var full_b = this._format(this._strip_leading(b));
-		var new_a = this.round(full_a, internal_places);
-		var old_a;
-		var factor;
-		do {
-			old_a = new_a;
-			factor = this.subtract("2", full_b);
-			full_a = this.round(this.multiply(full_a, factor), raw_a.length+raw_b.length+internal_places);
-			full_b = this.round(this.multiply(full_b, factor), raw_a.length+raw_b.length+internal_places);
-			new_a = this.round(full_a, internal_places);
-		} while (new_a != old_a);
+		// Bring the divisor within [0,1]
+		b.mantissa.unshift(0);
+		b.exponent++;
+		adjust--;
 
-		var answer = this._parse(new_a);
-		answer.sign = dividend_sign;
-		return this.round(this._format(answer), result_places);
+		var new_b = this._format(b);
+		// Bring the divisor within [0.5,1]
+		new_b = this.multiply(new_b, ""+extra_factor);
+		// Magic numbers!  See the wikipedia article.
+		var x = this.add("2.9142", this.multiply(new_b, "-2"));
+		var old_x = "";
+		while (old_x.substr(0,this._divide_precision+2) != x.substr(0,this._divide_precision+2)) {
+			old_x = x;
+			x = this.round(this.multiply(x, this.subtract("2", this.multiply(new_b, x))), this._divide_precision*2);
+		}
+
+		var new_a = this.multiply(this.multiply(x, raw_a), extra_factor+"e"+adjust);
+
+		return this.round(new_a, places);
 	}
 };
