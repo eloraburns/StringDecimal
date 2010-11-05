@@ -256,6 +256,10 @@ var StringDecimal = {
 		a.sign = '+';
 		b.sign = '+';
 
+		if (StringDecimal._all_zero(a.mantissa)) {
+			return StringDecimal.round(dividend_sign + '0', result_places);
+		}
+
 		// If b's length is larger than its exponent+1, then we'll
 		// have to divide by 10 a few times to get it to 0 < b < 1
 		if (b.mantissa.length > b.exponent+1) {
@@ -283,8 +287,8 @@ var StringDecimal = {
 		do {
 			old_a = new_a;
 			factor = StringDecimal.subtract("2", full_b);
-			full_a = StringDecimal.multiply(full_a, factor);
-			full_b = StringDecimal.multiply(full_b, factor);
+			full_a = StringDecimal.round(StringDecimal.multiply(full_a, factor), raw_a.length+raw_b.length+internal_places);
+			full_b = StringDecimal.round(StringDecimal.multiply(full_b, factor), raw_a.length+raw_b.length+internal_places);
 			new_a = StringDecimal.round(full_a, internal_places);
 		} while (new_a != old_a);
 
