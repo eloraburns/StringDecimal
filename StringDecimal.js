@@ -210,9 +210,10 @@ var StringDecimal = {
 	},
 
 	round: function(raw_a, places) {
+		var integer_places = parseInt(places, 10);
 		var a = StringDecimal._parse(raw_a);
-		if (a.exponent > places) {
-			while (a.exponent > places+1) {
+		if (a.exponent > integer_places) {
+			while (a.exponent > integer_places+1) {
 				a.exponent--;
 				a.mantissa.pop();
 			}
@@ -223,7 +224,7 @@ var StringDecimal = {
 				a.mantissa = StringDecimal._carry(a.mantissa);
 			}
 		} else {
-			while (a.exponent < places) {
+			while (a.exponent < integer_places) {
 				a.exponent++;
 				a.mantissa.push(0);
 			}
@@ -243,6 +244,8 @@ var StringDecimal = {
 	divide: function(raw_a, raw_b, places) {
 		var a = StringDecimal._parse(raw_a);
 		var b = StringDecimal._strip_leading(StringDecimal._parse(raw_b));
+		var internal_places = parseInt(places, 10) + 2;
+		var result_places = parseInt(places, 10);
 		var shift_places = 0;
 
 		if (StringDecimal._all_zero(b.mantissa)) {
@@ -274,24 +277,19 @@ var StringDecimal = {
 		// Let's start approximating (http://en.wikipedia.org/wiki/Division_(digital)#Goldschmidt_division)!
 		var full_a = StringDecimal._format(StringDecimal._strip_leading(a));
 		var full_b = StringDecimal._format(StringDecimal._strip_leading(b));
-		console.log(full_a + " divided by " + full_b);
-		var new_a = StringDecimal.round(full_a, places);
+		var new_a = StringDecimal.round(full_a, internal_places);
 		var old_a;
 		var factor;
 		do {
 			old_a = new_a;
 			factor = StringDecimal.subtract("2", full_b);
-			console.log("FACTOR " + factor);
 			full_a = StringDecimal.multiply(full_a, factor);
 			full_b = StringDecimal.multiply(full_b, factor);
-			console.log("PLACES " + places);
-			console.log("FULL A " + full_a);
-			new_a = StringDecimal.round(full_a, places);
-			console.log("NEW A " + new_a);
+			new_a = StringDecimal.round(full_a, internal_places);
 		} while (new_a != old_a);
 
 		var answer = StringDecimal._parse(new_a);
 		answer.sign = dividend_sign;
-		return StringDecimal._format(answer);
+		return StringDecimal.round(StringDecimal._format(answer), result_places);
 	}
 };
