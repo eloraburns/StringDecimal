@@ -34,13 +34,6 @@ test("_array_fill", function() {
 	same(StringDecimal._array_fill(2, 0), [0, 0], "two zeros");
 });
 
-test("_produce_addends", function() {
-	same(StringDecimal._produce_addends([1], [1]), [[1]], "[1], [1]");
-	same(StringDecimal._produce_addends([1], [1, 2]), [[1, 0], [0, 2]], "[1], [1, 2]");
-	same(StringDecimal._produce_addends([1, 2], [1]), [[1, 2]], "[1, 2], [1]");
-	same(StringDecimal._produce_addends([1, 2], [3, 4]), [[3, 6, 0], [0, 4, 8]], "[1, 2], [3, 4]");
-});
-
 test("_parse", function() {
 	same(StringDecimal._parse("0"), {
 		'sign': '+',
