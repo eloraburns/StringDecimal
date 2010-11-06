@@ -16,6 +16,14 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array(1, 9, 2, 8, 3, 7, 4, 6, 5, 0), $this->sd->_string_to_array("1928374650"));
 	}
 
+	function test__array_to_string() {
+		$this->assertEquals("0", $this->sd->_array_to_string(array(0)));
+		$this->assertEquals("1", $this->sd->_array_to_string(array(1)));
+		$this->assertEquals("9", $this->sd->_array_to_string(array(9)));
+		$this->assertEquals("10", $this->sd->_array_to_string(array(1, 0)));
+		$this->assertEquals("1928374650", $this->sd->_array_to_string(array(1, 9, 2, 8, 3, 7, 4, 6, 5, 0)));
+	}
+
 	function test__strip_leading() {
 		$base = array(
 			'sign' => '+',
@@ -110,7 +118,50 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 			'mantissa' => array(1, 0),
 			'exponent' => 0
 		), "1e1");
+	}
 
+
+	function test__format() {
+		$this->assertEquals($this->sd->_format(array(
+			'sign' => '+',
+			'mantissa' => array(0),
+			'exponent' => 0
+		)), "0", "zero");
+		$this->assertEquals($this->sd->_format(array(
+			'sign' => '-',
+			'mantissa' => array(0),
+			'exponent' => 0
+		)), "-0", "negative zero");
+		$this->assertEquals($this->sd->_format(array(
+			'sign' => '+',
+			'mantissa' => array(1),
+			'exponent' => 0
+		)), "1", "one");
+		$this->assertEquals($this->sd->_format(array(
+			'sign' => '+',
+			'mantissa' => array(1),
+			'exponent' => 0
+		)), "1", "positive one");
+		$this->assertEquals($this->sd->_format(array(
+			'sign' => '-',
+			'mantissa' => array(1),
+			'exponent' => 0
+		)), "-1", "negative one");
+		$this->assertEquals($this->sd->_format(array(
+			'sign' => '+',
+			'mantissa' => array(1, 0),
+			'exponent' => 0
+		)), "10", "ten");
+		$this->assertEquals($this->sd->_format(array(
+			'sign' => '+',
+			'mantissa' => array(1, 0),
+			'exponent' => 1
+		)), "1.0", "one point aught");
+		$this->assertEquals($this->sd->_format(array(
+			'sign' => '-',
+			'mantissa' => array(1, 0),
+			'exponent' => 1
+		)), "-1.0", "negative one point aught");
 	}
 
 	static function shared_testcases() {

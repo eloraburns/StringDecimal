@@ -14,6 +14,10 @@ class StringDecimal {
 		return array_map('intval', str_split($str));
 	}
 
+	function _array_to_string($arr) {
+		return join('', array_map('strval', $arr));
+	}
+
 	function _strip_leading($a) {
 		while (count($a['mantissa'])-1 > $a['exponent'] && $a['mantissa'][0] === 0) {
 			array_shift($a['mantissa']);
@@ -50,4 +54,16 @@ class StringDecimal {
 		}
 		return $this->_strip_leading($value);
 	}
+
+	function _format($obj) {
+		$sign = ($obj['sign'] == "-") ? "-" : "";
+		$mantissa = $this->_array_to_string($obj['mantissa']);
+		$decimal_point = ($obj['exponent'] > 0) ? "." : "";
+		$decimal_point_offset = strlen($mantissa) - $obj['exponent'];
+		return $sign .
+			substr($mantissa, 0, $decimal_point_offset) .
+			$decimal_point .
+			substr($mantissa, $decimal_point_offset);
+	}
+
 }
