@@ -66,6 +66,25 @@ class StringDecimal {
 			substr($mantissa, $decimal_point_offset);
 	}
 
+	function _array_add($a, $b) {
+		if (count($a) != count($b)) {
+			throw new Exception("Arrays of dissimilar length cannot be added");
+		}
+		$result = array();
+		for ($i = 0; $i < count($a); $i++) {
+			$result[$i] = $a[$i] + $b[$i];
+		}
+		return $result;
+	}
+
+	function _array_multiply($a, $n) {
+		$result = array();
+		for ($i = 0; $i < count($a); $i++) {
+			$result[$i] = $a[$i] * $n;
+		}
+		return $result;
+	}
+
 	function _match_exponents(&$a, &$b) {
 		while ($a['exponent'] > $b['exponent']) {
 			$b['exponent']++;
@@ -97,11 +116,11 @@ class StringDecimal {
 		if ($a['sign'] == $b['sign']) {
 			$sum = array(
 				'sign' => $a['sign'],
-				'mantissa' => array(),
-				'exponent' => 0
+				'mantissa' => $this->_array_add($a['mantissa'], $b['mantissa']),
+				'exponent' => $a['exponent']
 			);
 		}
-		return $sum;
+		return $this->_format($sum);
 	}
 
 }

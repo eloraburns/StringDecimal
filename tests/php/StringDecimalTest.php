@@ -24,6 +24,20 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals("1928374650", $this->sd->_array_to_string(array(1, 9, 2, 8, 3, 7, 4, 6, 5, 0)));
 	}
 
+	function test__array_add() {
+		$this->assertEquals(array(0), $this->sd->_array_add(array(0), array(0)), "zero plus zero is zero");
+		$this->assertEquals(array(2), $this->sd->_array_add(array(1), array(1)), "one plus one is two");
+		$this->assertEquals(array(3, 4), $this->sd->_array_add(array(1, 0), array(2, 4)), "one zero plus two four is three four");
+		$this->assertEquals(array(10), $this->sd->_array_add(array(9), array(1)), "nine plus one is ten");
+	}
+
+	function test__array_multiply() {
+		$this->assertEquals(array(0), $this->sd->_array_multiply(array(0), -1), "negated zero is zero");
+		$this->assertEquals(array(-1), $this->sd->_array_multiply(array(1), -1), "negated one is negative one");
+		$this->assertEquals(array(-1, -2), $this->sd->_array_multiply(array(1, 2), -1), "negated one two is negative one negative two");
+		$this->assertEquals(array(9, 18), $this->sd->_array_multiply(array(1, 2), 9), "one two times 9 is nine eightteen");
+	}
+
 	function test__strip_leading() {
 		$base = array(
 			'sign' => '+',
