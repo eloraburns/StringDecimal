@@ -167,4 +167,35 @@ class StringDecimal {
 		return $this->add($raw_a, $this->_format($b));
 	}
 
+	function multiply($raw_a, $raw_b) {
+		$a = $this->_parse($raw_a);
+		$b = $this->_parse($raw_b);
+		$product = array();
+		if ($a['sign'] == $b['sign']) {
+			$product['sign'] = '+';
+		} else {
+			$product['sign'] = '-';
+		}
+		// This is just like in elementary school
+		//   1 2
+		// * 3 4
+		// -----
+		//   4 8
+		// 3 6
+		// -----
+		// 4 0 8
+		$addend_width = count($a['mantissa']) + count($b['mantissa']) - 1;
+		$acc = array_fill(0, $addend_width, 0);
+		for ($i = 0; $i < count($b['mantissa']); $i++) {
+			for ($j = 0; $j < count($a['mantissa']); $j++) {
+				$acc[$i+$j] += $a['mantissa'][$j] * $b['mantissa'][$i];
+			}
+		}
+		// _carry() happily takes very large values to carry, and we shouldn't ever need more than the one
+		// extra digit _carry() will give us at the end.
+		$product['mantissa'] = $this->_carry($acc);
+		$product['exponent'] = $a['exponent'] + $b['exponent'];
+		return $this->_format($this->_strip_leading($product));
+	}
+
 }
