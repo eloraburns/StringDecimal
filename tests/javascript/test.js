@@ -26,7 +26,7 @@ test("_array_multiply", function() {
 	same(StringDecimal._array_multiply([1], -1), [-1], "negated one is negative one");
 	same(StringDecimal._array_multiply([1, 2], -1), [-1, -2], "negated one two is negative one negative two");
 	same(StringDecimal._array_multiply([1, 2], 9), [9, 18], "one two times 9 is nine eightteen");
-})
+});
 
 test("_array_fill", function() {
 	same(StringDecimal._array_fill(0, 0), [], "empty array");
