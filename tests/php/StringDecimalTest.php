@@ -82,6 +82,15 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array(0, 9), $this->sd->_carry(array(1,-1)), "one negative one");
 	}
 
+	function test__all_zero() {
+		$this->assertTrue($this->sd->_all_zero(array()), "array()");
+		$this->assertTrue($this->sd->_all_zero(array(0)), "array(0)");
+		$this->assertFalse($this->sd->_all_zero(array(1)), "array(1)");
+		$this->assertFalse($this->sd->_all_zero(array(0, 1)), "array(0, 1)");
+		$this->assertFalse($this->sd->_all_zero(array(1, 0)), "array(1, 0)");
+		$this->assertTrue($this->sd->_all_zero(array(0, 0)), "array(0, 0)");
+	}
+
 	function test__parse() {
 		$this->assertEquals($this->sd->_parse("0"), array(
 			'sign' => '+',

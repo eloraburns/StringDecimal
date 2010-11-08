@@ -220,4 +220,14 @@ class StringDecimal {
 		}
 		return $this->_format($a);
 	}
+
+	function _all_zero($a) {
+		foreach ($a as $v) {
+			if ($v !== 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 }
