@@ -25,6 +25,23 @@ class StringDecimal {
 		return $a;
 	}
 
+	function _carry($arr) {
+		$carry = 0;
+		$result = array();
+		for ($i = count($arr)-1; $i >= 0; $i--) {
+			$current = $arr[$i] + $carry;
+			$carry = (int)floor($current / 10);
+			while ($current < 0) {
+				$current += 10;
+			}
+			array_push($result, $current % 10);
+		}
+		if ($carry > 0) {
+			array_push($result, $carry);
+		}
+		return array_reverse($result);
+	}
+
 	function _parse($str) {
 		preg_match("/^(\+|-)?0*(\d+)(?:\.(\d+))?(?:e((?:\+|-)?\d+))?$/i", $str, $matches);
 		$sign = $matches[1] ? $matches[1] : '+';
@@ -119,7 +136,28 @@ class StringDecimal {
 				'mantissa' => $this->_array_add($a['mantissa'], $b['mantissa']),
 				'exponent' => $a['exponent']
 			);
+		} else {
+			if ($a['mantissa'] > $b['mantissa']) {
+				$sum = array(
+					'sign' => $a['sign'],
+					'mantissa' => $this->_array_add($a['mantissa'], $this->_array_multiply($b['mantissa'], -1)),
+					'exponent' => $a['exponent']
+				);
+			} elseif ($a['mantissa'] < $b['mantissa']) {
+				$sum = array(
+					'sign' => $b['sign'],
+					'mantissa' => $this->_array_add($this->_array_multiply($a['mantissa'], -1), $b['mantissa']),
+					'exponent' => $a['exponent']
+				);
+			} else {
+				$sum = array(
+					'sign' => '+',
+					'mantissa' => array_fill(0, count($a['mantissa']), 0),
+					'exponent' => $a['exponent']
+				);
+			}
 		}
+		$sum['mantissa'] = $this->_carry($sum['mantissa']);
 		return $this->_format($sum);
 	}
 
