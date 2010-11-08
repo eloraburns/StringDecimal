@@ -198,4 +198,26 @@ class StringDecimal {
 		return $this->_format($this->_strip_leading($product));
 	}
 
+	function round($raw_a, $places) {
+		$integer_places = intval($places, 10);
+		$a = $this->_parse($raw_a);
+		if ($a['exponent'] > $integer_places) {
+			while ($a['exponent'] > $integer_places+1) {
+				$a['exponent']--;
+				array_pop($a['mantissa']);
+			}
+			$a['exponent']--;
+			$rounding_digit = array_pop($a['mantissa']);
+			if ($rounding_digit >= 5) {
+				$a['mantissa'][count($a['mantissa'])-1]++;
+				$a['mantissa'] = $this->_carry($a['mantissa']);
+			}
+		} else {
+			while ($a['exponent'] < $integer_places) {
+				$a['exponent']++;
+				array_push($a['mantissa'], 0);
+			}
+		}
+		return $this->_format($a);
+	}
 }
