@@ -120,7 +120,6 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		), "1e1");
 	}
 
-
 	function test__format() {
 		$this->assertEquals($this->sd->_format(array(
 			'sign' => '+',
@@ -162,6 +161,76 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 			'mantissa' => array(1, 0),
 			'exponent' => 1
 		)), "-1.0", "negative one point aught");
+	}
+
+	function test__match_exponents() {
+		$base = array(
+			'sign' => '+',
+			'mantissa' => array(0),
+			'exponent' => 0
+		);
+
+		$a = $this->sd->_copy($base);
+		$b = $this->sd->_copy($base);
+		$this->sd->_match_exponents($a, $b);
+		$this->assertEquals(array(0), $a['mantissa']);
+		$this->assertEquals(0, $a['exponent']);
+		$this->assertEquals($b['mantissa'], $a['mantissa']);
+		$this->assertEquals($b['exponent'], $a['exponent']);
+
+		$a = $this->sd->_copy($base);
+		$b = $this->sd->_copy($base);
+		$a['mantissa'] = array(0, 0);
+		$a['exponent'] = 1;
+		$this->sd->_match_exponents($a, $b);
+		$this->assertEquals(array(0, 0), $a['mantissa']);
+		$this->assertEquals(1, $a['exponent']);
+		$this->assertEquals($b['mantissa'], $a['mantissa']);
+		$this->assertEquals($b['exponent'], $a['exponent']);
+
+		$a = $this->sd->_copy($base);
+		$b = $this->sd->_copy($base);
+		$b['mantissa'] = array(0, 0);
+		$b['exponent'] = 1;
+		$this->sd->_match_exponents($a, $b);
+		$this->assertEquals(array(0, 0), $a['mantissa']);
+		$this->assertEquals(1, $a['exponent']);
+		$this->assertEquals($b['mantissa'], $a['mantissa']);
+		$this->assertEquals($b['exponent'], $a['exponent']);
+	}
+
+	function test__match_leading() {
+		$base = array(
+			'sign' => '+',
+			'mantissa' => array(0),
+			'exponent' => 0
+		);
+
+		$a = $this->sd->_copy($base);
+		$b = $this->sd->_copy($base);
+		$this->sd->_match_leading($a, $b);
+		$this->assertEquals(array(0), $a['mantissa']);
+		$this->assertEquals(0, $a['exponent']);
+		$this->assertEquals($b['mantissa'], $a['mantissa']);
+		$this->assertEquals($b['exponent'], $a['exponent']);
+
+		$a = $this->sd->_copy($base);
+		$b = $this->sd->_copy($base);
+		$a['mantissa'] = array(0, 0);
+		$this->sd->_match_leading($a, $b);
+		$this->assertEquals(array(0, 0), $a['mantissa']);
+		$this->assertEquals(0, $a['exponent']);
+		$this->assertEquals($b['mantissa'], $a['mantissa']);
+		$this->assertEquals($b['exponent'], $a['exponent']);
+
+		$a = $this->sd->_copy($base);
+		$b = $this->sd->_copy($base);
+		$b['mantissa'] = array(0, 0);
+		$this->sd->_match_leading($a, $b);
+		$this->assertEquals(array(0, 0), $a['mantissa']);
+		$this->assertEquals(0, $a['exponent']);
+		$this->assertEquals($b['mantissa'], $a['mantissa']);
+		$this->assertEquals($b['exponent'], $a['exponent']);
 	}
 
 	static function shared_testcases() {

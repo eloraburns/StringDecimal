@@ -66,4 +66,42 @@ class StringDecimal {
 			substr($mantissa, $decimal_point_offset);
 	}
 
+	function _match_exponents(&$a, &$b) {
+		while ($a['exponent'] > $b['exponent']) {
+			$b['exponent']++;
+			array_push($b['mantissa'], 0);
+		}
+		while ($b['exponent'] > $a['exponent']) {
+			$a['exponent']++;
+			array_push($a['mantissa'], 0);
+		}
+	}
+
+	function _match_leading(&$a, &$b) {
+		if ($a['exponent'] != $b['exponent']) {
+			throw new Exception("Can't match leading with different exponents");
+		}
+		while (count($a['mantissa']) > count($b['mantissa'])) {
+			array_unshift($b['mantissa'], 0);
+		}
+		while (count($b['mantissa']) > count($a['mantissa'])) {
+			array_unshift($a['mantissa'], 0);
+		}
+	}
+
+	function add($raw_a, $raw_b) {
+		$a = $this->_parse($raw_a);
+		$b = $this->_parse($raw_b);
+		$this->_match_exponents($a, $b);
+		$this->_match_leading($a, $b);
+		if ($a['sign'] == $b['sign']) {
+			$sum = array(
+				'sign' => $a['sign'],
+				'mantissa' => array(),
+				'exponent' => 0
+			);
+		}
+		return $sum;
+	}
+
 }
