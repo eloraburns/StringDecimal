@@ -230,4 +230,59 @@ class StringDecimal {
 		return true;
 	}
 
+	function divide($raw_a, $raw_b, $places) {
+		// See http://en.wikipedia.org/wiki/Division_(digital)#Newton.E2.80.93Raphson_division
+		$a = $this->_parse($raw_a);
+		$b = $this->_parse($raw_b);
+
+		if ($this->_all_zero($b['mantissa'])) {
+			return "NaN";
+		}
+		if ($this->_all_zero($a['mantissa'])) {
+			return $this->round($this->_format(array(
+				'sign' => ($a['sign'] == $b['sign']) ? '+' : '-',
+				'mantissa' => array(0),
+				'exponent' => 0
+			)), $places);
+		}
+
+		$adjust = 0;
+		while ($b['mantissa'][0] === 0) {
+			$adjust++;
+			$b['exponent']--;
+			array_shift($b['mantissa']);
+		}
+		while (count($b['mantissa']) > $b['exponent']+1) {
+			$adjust--;
+			$b['exponent']++;
+		}
+		// Now the divisor is within [1,10]
+
+		$factor_map = array(1, 5, 3, 2, 2, 1, 1, 1, 1, 1);
+		$extra_factor = $factor_map[$b['mantissa'][0]];
+		if ($b['sign'] == '-') {
+			$extra_factor *= -1;
+		}
+
+		// Bring the divisor with [0,1]
+		array_unshift($b['mantissa'], 0);
+		$b['exponent']++;
+		$adjust--;
+
+		$new_b = $this->_format($b);
+		// Bring the divisor within [0.5, 1]
+		$new_b = $this->multiply($new_b, (string)$extra_factor);
+		// Magic numbers!  See the wikipedia article
+		$x = $this->add("2.9142", $this->multiply($new_b, "-2"));
+		$old_x = "";
+		while (substr($old_x, 0, $this->divide_precision+2) != substr($x, 0, $this->divide_precision+2)) {
+			$old_x = $x;
+			$x = $this->round($this->multiply($x, $this->subtract("2", $this->multiply($new_b, $x))), $this->divide_precision*2);
+		}
+
+		$new_a = $this->multiply($this->multiply($x, $raw_a), $extra_factor . "e" . $adjust);
+
+		return $this->round($new_a, $places);
+	}
+
 }
