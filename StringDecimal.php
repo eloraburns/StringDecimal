@@ -161,4 +161,10 @@ class StringDecimal {
 		return $this->_format($sum);
 	}
 
+	function subtract($raw_a, $raw_b) {
+		$b = $this->_parse($raw_b);
+		$b['sign'] = ($b['sign'] == "-") ? "+" : "-";
+		return $this->add($raw_a, $this->_format($b));
+	}
+
 }
