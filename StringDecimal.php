@@ -1,8 +1,15 @@
 <?php
+/* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php */
 
 class StringDecimal {
 
 	public $_divide_precision = 30;
+
+	function __construct($divide_precision = NULL) {
+		if ($divide_precision !== NULL) {
+			$this->_divide_precision = intval($divide_precision);
+		}
+	}
 
 	function _copy($a) {
 		return array(
