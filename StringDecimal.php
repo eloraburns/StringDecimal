@@ -2,6 +2,8 @@
 
 class StringDecimal {
 
+	public $_divide_precision = 30;
+
 	function _copy($a) {
 		return array(
 			'sign' => $a['sign'],
