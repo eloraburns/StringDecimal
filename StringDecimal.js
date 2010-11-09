@@ -304,7 +304,16 @@ var StringDecimal = {
 		var old_x = "";
 		while (old_x.substr(0,this._divide_precision+2) != x.substr(0,this._divide_precision+2)) {
 			old_x = x;
-			x = this.round(this.multiply(x, this.subtract("2", this.multiply(new_b, x))), this._divide_precision*2);
+			x = this.round(
+				this.multiply(
+					x,
+					this.subtract(
+						"2",
+						this.multiply(new_b, x)
+					)
+				),
+				this._divide_precision*2
+			);
 		}
 
 		var new_a = this.multiply(this.multiply(x, raw_a), extra_factor+"e"+adjust);
