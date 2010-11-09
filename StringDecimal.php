@@ -277,7 +277,7 @@ class StringDecimal {
 		// Magic numbers!  See the wikipedia article
 		$x = $this->add("2.9142", $this->multiply($new_b, "-2"));
 		$old_x = "";
-		while (substr($old_x, 0, $this->divide_precision+2) != substr($x, 0, $this->divide_precision+2)) {
+		while (substr($old_x, 0, $this->_divide_precision+2) !== substr($x, 0, $this->_divide_precision+2)) {
 			$old_x = $x;
 			$x = $this->round(
 				$this->multiply(
