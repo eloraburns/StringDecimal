@@ -2,18 +2,38 @@
 var StringDecimal = {
 	_divide_precision: 30,
 
-	_copy: function(sd) {
-		return {
-			'sign': sd.sign,
-			'mantissa': sd.mantissa.slice(),
-			'exponent': sd.exponent
-		};
+	_all_zero: function(a) {
+		for (var i = 0; i < a.length; i++) {
+			if (a[i] !== 0) {
+				return false;
+			}
+		}
+		return true;
 	},
 
-	_string_to_array: function(str) {
+	_array_add: function(a, b) {
+		if (a.length != b.length) {
+			throw "Arrays of dissimilar length cannot be added";
+		}
+		var result = new Array(a.length);
+		for (var i = 0; i < a.length; i++) {
+			result[i] = a[i] + b[i];
+		}
+		return result;
+	},
+
+	_array_fill: function(length, value) {
 		var result = [];
-		for (var i = 0; i < str.length; i++) {
-			result.push(parseInt(str[i], 10));
+		while (length--) {
+			result.push(value);
+		}
+		return result;
+	},
+
+	_array_multiply: function(arr, n) {
+		var result = new Array(arr.length);
+		for (var i = 0; i < arr.length; i++) {
+			result[i] = arr[i] * n;
 		}
 		return result;
 	},
@@ -26,12 +46,69 @@ var StringDecimal = {
 		return result;
 	},
 
-	_array_fill: function(length, value) {
+	_carry: function(arr) {
+		var carry = 0;
 		var result = [];
-		while (length--) {
-			result.push(value);
+		var current = 0;
+		for (var i = arr.length-1; i >= 0; i--) {
+			current = arr[i] + carry;
+			carry = Math.floor(current / 10);
+			while (current < 0) {
+				current += 10;
+			}
+			result.push(Math.round(current % 10));
+		}
+		if (carry > 0) {
+			result.push(carry);
+		}
+		result.reverse();
+		return result;
+	},
+
+	_copy: function(sd) {
+		return {
+			'sign': sd.sign,
+			'mantissa': sd.mantissa.slice(),
+			'exponent': sd.exponent
+		};
+	},
+
+	_match_exponents: function(a, b) {
+		while (a.exponent > b.exponent) {
+			b.exponent++;
+			b.mantissa.push(0);
+		}
+		while (b.exponent > a.exponent) {
+			a.exponent++;
+			a.mantissa.push(0);
+		}
+	},
+
+	_match_leading: function(a, b) {
+		if (a.exponent != b.exponent) {
+			throw "Can't match leading with different exponents";
+		}
+		while (a.mantissa.length > b.mantissa.length) {
+			b.mantissa.unshift(0);
+		}
+		while (b.mantissa.length > a.mantissa.length) {
+			a.mantissa.unshift(0);
+		}
+	},
+
+	_string_to_array: function(str) {
+		var result = [];
+		for (var i = 0; i < str.length; i++) {
+			result.push(parseInt(str[i], 10));
 		}
 		return result;
+	},
+
+	_strip_leading: function(a) {
+		while (a.mantissa.length-1 > a.exponent && a.mantissa[0] === 0) {
+			a.mantissa.shift();
+		}
+		return a;
 	},
 
 	/*
@@ -79,74 +156,6 @@ var StringDecimal = {
 			mantissa.substr(0, decimal_point_offset) +
 			decimal_point + 
 			mantissa.substr(decimal_point_offset);
-	},
-
-	_array_add: function(a, b) {
-		if (a.length != b.length) {
-			throw "Arrays of dissimilar length cannot be added";
-		}
-		var result = new Array(a.length);
-		for (var i = 0; i < a.length; i++) {
-			result[i] = a[i] + b[i];
-		}
-		return result;
-	},
-
-	_array_multiply: function(arr, n) {
-		var result = new Array(arr.length);
-		for (var i = 0; i < arr.length; i++) {
-			result[i] = arr[i] * n;
-		}
-		return result;
-	},
-
-	_match_exponents: function(a, b) {
-		while (a.exponent > b.exponent) {
-			b.exponent++;
-			b.mantissa.push(0);
-		}
-		while (b.exponent > a.exponent) {
-			a.exponent++;
-			a.mantissa.push(0);
-		}
-	},
-
-	_match_leading: function(a, b) {
-		if (a.exponent != b.exponent) {
-			throw "Can't match leading with different exponents";
-		}
-		while (a.mantissa.length > b.mantissa.length) {
-			b.mantissa.unshift(0);
-		}
-		while (b.mantissa.length > a.mantissa.length) {
-			a.mantissa.unshift(0);
-		}
-	},
-
-	_strip_leading: function(a) {
-		while (a.mantissa.length-1 > a.exponent && a.mantissa[0] === 0) {
-			a.mantissa.shift();
-		}
-		return a;
-	},
-
-	_carry: function(arr) {
-		var carry = 0;
-		var result = [];
-		var current = 0;
-		for (var i = arr.length-1; i >= 0; i--) {
-			current = arr[i] + carry;
-			carry = Math.floor(current / 10);
-			while (current < 0) {
-				current += 10;
-			}
-			result.push(Math.round(current % 10));
-		}
-		if (carry > 0) {
-			result.push(carry);
-		}
-		result.reverse();
-		return result;
 	},
 
 	add: function(raw_a, raw_b) {
@@ -226,38 +235,6 @@ var StringDecimal = {
 		return this._format(this._strip_leading(product));
 	},
 
-	round: function(raw_a, places) {
-		var integer_places = parseInt(places, 10);
-		var a = this._parse(raw_a);
-		if (a.exponent > integer_places) {
-			while (a.exponent > integer_places+1) {
-				a.exponent--;
-				a.mantissa.pop();
-			}
-			a.exponent--;
-			var rounding_digit = a.mantissa.pop();
-			if (rounding_digit >= 5) {
-				a.mantissa[a.mantissa.length-1]++;
-				a.mantissa = this._carry(a.mantissa);
-			}
-		} else {
-			while (a.exponent < integer_places) {
-				a.exponent++;
-				a.mantissa.push(0);
-			}
-		}
-		return this._format(a);
-	},
-
-	_all_zero: function(a) {
-		for (var i = 0; i < a.length; i++) {
-			if (a[i] !== 0) {
-				return false;
-			}
-		}
-		return true;
-	},
-
 	divide: function(raw_a, raw_b, places) {
 		// See http://en.wikipedia.org/wiki/Division_(digital)#Newton.E2.80.93Raphson_division
 		var a = this._parse(raw_a);
@@ -319,5 +296,28 @@ var StringDecimal = {
 		var new_a = this.multiply(this.multiply(x, raw_a), extra_factor+"e"+adjust);
 
 		return this.round(new_a, places);
+	},
+
+	round: function(raw_a, places) {
+		var integer_places = parseInt(places, 10);
+		var a = this._parse(raw_a);
+		if (a.exponent > integer_places) {
+			while (a.exponent > integer_places+1) {
+				a.exponent--;
+				a.mantissa.pop();
+			}
+			a.exponent--;
+			var rounding_digit = a.mantissa.pop();
+			if (rounding_digit >= 5) {
+				a.mantissa[a.mantissa.length-1]++;
+				a.mantissa = this._carry(a.mantissa);
+			}
+		} else {
+			while (a.exponent < integer_places) {
+				a.exponent++;
+				a.mantissa.push(0);
+			}
+		}
+		return this._format(a);
 	}
 };

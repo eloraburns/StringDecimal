@@ -11,27 +11,36 @@ class StringDecimal {
 		}
 	}
 
-	function _copy($sd) {
-		return array(
-			'sign' => $sd['sign'],
-			'mantissa' => array_slice($sd['mantissa'], 0),
-			'exponent' => $sd['exponent']
-		);
+	function _all_zero($a) {
+		foreach ($a as $v) {
+			if ($v !== 0) {
+				return false;
+			}
+		}
+		return true;
 	}
 
-	function _string_to_array($str) {
-		return array_map('intval', str_split($str));
+	function _array_add($a, $b) {
+		if (count($a) != count($b)) {
+			throw new Exception("Arrays of dissimilar length cannot be added");
+		}
+		$result = array();
+		for ($i = 0; $i < count($a); $i++) {
+			$result[$i] = $a[$i] + $b[$i];
+		}
+		return $result;
+	}
+
+	function _array_multiply($a, $n) {
+		$result = array();
+		for ($i = 0; $i < count($a); $i++) {
+			$result[$i] = $a[$i] * $n;
+		}
+		return $result;
 	}
 
 	function _array_to_string($arr) {
 		return join('', array_map('strval', $arr));
-	}
-
-	function _strip_leading($sd) {
-		while (count($sd['mantissa'])-1 > $sd['exponent'] && $sd['mantissa'][0] === 0) {
-			array_shift($sd['mantissa']);
-		}
-		return $sd;
 	}
 
 	function _carry($arr) {
@@ -49,6 +58,48 @@ class StringDecimal {
 			array_push($result, $carry);
 		}
 		return array_reverse($result);
+	}
+
+	function _copy($sd) {
+		return array(
+			'sign' => $sd['sign'],
+			'mantissa' => array_slice($sd['mantissa'], 0),
+			'exponent' => $sd['exponent']
+		);
+	}
+
+	function _match_exponents(&$a, &$b) {
+		while ($a['exponent'] > $b['exponent']) {
+			$b['exponent']++;
+			array_push($b['mantissa'], 0);
+		}
+		while ($b['exponent'] > $a['exponent']) {
+			$a['exponent']++;
+			array_push($a['mantissa'], 0);
+		}
+	}
+
+	function _match_leading(&$a, &$b) {
+		if ($a['exponent'] != $b['exponent']) {
+			throw new Exception("Can't match leading with different exponents");
+		}
+		while (count($a['mantissa']) > count($b['mantissa'])) {
+			array_unshift($b['mantissa'], 0);
+		}
+		while (count($b['mantissa']) > count($a['mantissa'])) {
+			array_unshift($a['mantissa'], 0);
+		}
+	}
+
+	function _string_to_array($str) {
+		return array_map('intval', str_split($str));
+	}
+
+	function _strip_leading($sd) {
+		while (count($sd['mantissa'])-1 > $sd['exponent'] && $sd['mantissa'][0] === 0) {
+			array_shift($sd['mantissa']);
+		}
+		return $sd;
 	}
 
 	function _parse($str) {
@@ -90,48 +141,6 @@ class StringDecimal {
 			substr($mantissa, 0, $decimal_point_offset) .
 			$decimal_point .
 			substr($mantissa, $decimal_point_offset);
-	}
-
-	function _array_add($a, $b) {
-		if (count($a) != count($b)) {
-			throw new Exception("Arrays of dissimilar length cannot be added");
-		}
-		$result = array();
-		for ($i = 0; $i < count($a); $i++) {
-			$result[$i] = $a[$i] + $b[$i];
-		}
-		return $result;
-	}
-
-	function _array_multiply($a, $n) {
-		$result = array();
-		for ($i = 0; $i < count($a); $i++) {
-			$result[$i] = $a[$i] * $n;
-		}
-		return $result;
-	}
-
-	function _match_exponents(&$a, &$b) {
-		while ($a['exponent'] > $b['exponent']) {
-			$b['exponent']++;
-			array_push($b['mantissa'], 0);
-		}
-		while ($b['exponent'] > $a['exponent']) {
-			$a['exponent']++;
-			array_push($a['mantissa'], 0);
-		}
-	}
-
-	function _match_leading(&$a, &$b) {
-		if ($a['exponent'] != $b['exponent']) {
-			throw new Exception("Can't match leading with different exponents");
-		}
-		while (count($a['mantissa']) > count($b['mantissa'])) {
-			array_unshift($b['mantissa'], 0);
-		}
-		while (count($b['mantissa']) > count($a['mantissa'])) {
-			array_unshift($a['mantissa'], 0);
-		}
 	}
 
 	function add($raw_a, $raw_b) {
@@ -207,38 +216,6 @@ class StringDecimal {
 		return $this->_format($this->_strip_leading($product));
 	}
 
-	function round($raw_a, $places) {
-		$integer_places = intval($places, 10);
-		$a = $this->_parse($raw_a);
-		if ($a['exponent'] > $integer_places) {
-			while ($a['exponent'] > $integer_places+1) {
-				$a['exponent']--;
-				array_pop($a['mantissa']);
-			}
-			$a['exponent']--;
-			$rounding_digit = array_pop($a['mantissa']);
-			if ($rounding_digit >= 5) {
-				$a['mantissa'][count($a['mantissa'])-1]++;
-				$a['mantissa'] = $this->_carry($a['mantissa']);
-			}
-		} else {
-			while ($a['exponent'] < $integer_places) {
-				$a['exponent']++;
-				array_push($a['mantissa'], 0);
-			}
-		}
-		return $this->_format($a);
-	}
-
-	function _all_zero($a) {
-		foreach ($a as $v) {
-			if ($v !== 0) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	function divide($raw_a, $raw_b, $places) {
 		// See http://en.wikipedia.org/wiki/Division_(digital)#Newton.E2.80.93Raphson_division
 		$a = $this->_parse($raw_a);
@@ -301,6 +278,29 @@ class StringDecimal {
 		$new_a = $this->multiply($this->multiply($x, $raw_a), $extra_factor . "e" . $adjust);
 
 		return $this->round($new_a, $places);
+	}
+
+	function round($raw_a, $places) {
+		$integer_places = intval($places, 10);
+		$a = $this->_parse($raw_a);
+		if ($a['exponent'] > $integer_places) {
+			while ($a['exponent'] > $integer_places+1) {
+				$a['exponent']--;
+				array_pop($a['mantissa']);
+			}
+			$a['exponent']--;
+			$rounding_digit = array_pop($a['mantissa']);
+			if ($rounding_digit >= 5) {
+				$a['mantissa'][count($a['mantissa'])-1]++;
+				$a['mantissa'] = $this->_carry($a['mantissa']);
+			}
+		} else {
+			while ($a['exponent'] < $integer_places) {
+				$a['exponent']++;
+				array_push($a['mantissa'], 0);
+			}
+		}
+		return $this->_format($a);
 	}
 
 }
