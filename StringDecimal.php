@@ -11,11 +11,11 @@ class StringDecimal {
 		}
 	}
 
-	function _copy($a) {
+	function _copy($sd) {
 		return array(
-			'sign' => $a['sign'],
-			'mantissa' => array_slice($a['mantissa'], 0),
-			'exponent' => $a['exponent']
+			'sign' => $sd['sign'],
+			'mantissa' => array_slice($sd['mantissa'], 0),
+			'exponent' => $sd['exponent']
 		);
 	}
 
@@ -27,11 +27,11 @@ class StringDecimal {
 		return join('', array_map('strval', $arr));
 	}
 
-	function _strip_leading($a) {
-		while (count($a['mantissa'])-1 > $a['exponent'] && $a['mantissa'][0] === 0) {
-			array_shift($a['mantissa']);
+	function _strip_leading($sd) {
+		while (count($sd['mantissa'])-1 > $sd['exponent'] && $sd['mantissa'][0] === 0) {
+			array_shift($sd['mantissa']);
 		}
-		return $a;
+		return $sd;
 	}
 
 	function _carry($arr) {

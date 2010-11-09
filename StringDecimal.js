@@ -2,11 +2,11 @@
 var StringDecimal = {
 	_divide_precision: 30,
 
-	_copy: function(a) {
+	_copy: function(sd) {
 		return {
-			'sign': a.sign,
-			'mantissa': a.mantissa.slice(),
-			'exponent': a.exponent
+			'sign': sd.sign,
+			'mantissa': sd.mantissa.slice(),
+			'exponent': sd.exponent
 		};
 	},
 
