@@ -21,7 +21,7 @@ class StringDecimal {
 	}
 
 	function _array_add($a, $b) {
-		if (count($a) != count($b)) {
+		if (count($a) !== count($b)) {
 			throw new Exception("Arrays of dissimilar length cannot be added");
 		}
 		$result = array();
@@ -80,7 +80,7 @@ class StringDecimal {
 	}
 
 	function _match_leading(&$a, &$b) {
-		if ($a['exponent'] != $b['exponent']) {
+		if ($a['exponent'] !== $b['exponent']) {
 			throw new Exception("Can't match leading with different exponents");
 		}
 		while (count($a['mantissa']) > count($b['mantissa'])) {
@@ -105,9 +105,9 @@ class StringDecimal {
 	function _parse($str) {
 		preg_match("/^(\+|-)?0*(\d+)(?:\.(\d+))?(?:e((?:\+|-)?\d+))?$/i", $str, $matches);
 		$sign = $matches[1] ? $matches[1] : '+';
-		$fractional = strlen($matches[3]) == 0 ? "" : $matches[3];
+		$fractional = strlen($matches[3]) === 0 ? "" : $matches[3];
 		$mantissa_as_a_string = $matches[2] . $fractional;
-		$adjust = strlen($matches[4]) == 0 ? 0 : intval($matches[4]);
+		$adjust = strlen($matches[4]) === 0 ? 0 : intval($matches[4]);
 		$exponent = strlen($fractional);
 		$value = array(
 			'sign' => $sign,
@@ -133,7 +133,7 @@ class StringDecimal {
 	}
 
 	function _format($obj) {
-		$sign = ($obj['sign'] == "-") ? "-" : "";
+		$sign = ($obj['sign'] === "-") ? "-" : "";
 		$mantissa = $this->_array_to_string($obj['mantissa']);
 		$decimal_point = ($obj['exponent'] > 0) ? "." : "";
 		$decimal_point_offset = strlen($mantissa) - $obj['exponent'];
@@ -148,7 +148,7 @@ class StringDecimal {
 		$b = $this->_parse($raw_b);
 		$this->_match_exponents($a, $b);
 		$this->_match_leading($a, $b);
-		if ($a['sign'] == $b['sign']) {
+		if ($a['sign'] === $b['sign']) {
 			$sum = array(
 				'sign' => $a['sign'],
 				'mantissa' => $this->_array_add($a['mantissa'], $b['mantissa']),
@@ -181,7 +181,7 @@ class StringDecimal {
 
 	function subtract($raw_a, $raw_b) {
 		$b = $this->_parse($raw_b);
-		$b['sign'] = ($b['sign'] == "-") ? "+" : "-";
+		$b['sign'] = ($b['sign'] === "-") ? "+" : "-";
 		return $this->add($raw_a, $this->_format($b));
 	}
 
@@ -189,7 +189,7 @@ class StringDecimal {
 		$a = $this->_parse($raw_a);
 		$b = $this->_parse($raw_b);
 		$product = array();
-		if ($a['sign'] == $b['sign']) {
+		if ($a['sign'] === $b['sign']) {
 			$product['sign'] = '+';
 		} else {
 			$product['sign'] = '-';
@@ -226,7 +226,7 @@ class StringDecimal {
 		}
 		if ($this->_all_zero($a['mantissa'])) {
 			return $this->round($this->_format(array(
-				'sign' => ($a['sign'] == $b['sign']) ? '+' : '-',
+				'sign' => ($a['sign'] === $b['sign']) ? '+' : '-',
 				'mantissa' => array(0),
 				'exponent' => 0
 			)), $places);
@@ -246,7 +246,7 @@ class StringDecimal {
 
 		$factor_map = array(1, 5, 3, 2, 2, 1, 1, 1, 1, 1);
 		$extra_factor = $factor_map[$b['mantissa'][0]];
-		if ($b['sign'] == '-') {
+		if ($b['sign'] === '-') {
 			$extra_factor *= -1;
 		}
 
