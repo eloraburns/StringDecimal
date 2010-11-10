@@ -1,6 +1,45 @@
 <?php
 /* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php */
 
+class _StringDecimalNumber implements ArrayAccess {
+	private $sd;
+	public $sign;
+	public $mantissa;
+	public $exponent;
+
+	function __construct($str) {
+		$this->sd = new StringDecimal;
+		$sdn = $this->sd->_oldparse($str);
+		$this->sign = $sdn['sign'];
+		$this->mantissa = $sdn['mantissa'];
+		$this->exponent = $sdn['exponent'];
+	}
+
+	function offsetGet($k) {
+		if ($this->offsetExists($k)) {
+			return $this->{$k};
+		} else {
+			return NULL;
+		}
+	}
+
+	function offsetSet($k, $v) {
+		if ($this->offsetExists($k)) {
+			$this->$k = $v;
+		} else {
+			throw new Exception("Can't set $k on a " . __class__);
+		}
+	}
+
+	function offsetExists($k) {
+		return in_array($k, array('sign', 'mantissa', 'exponent'));
+	}
+
+	function offsetUnset($k) {
+		throw new Exception(__method__ . " unsupported");
+	}
+}
+
 class StringDecimal {
 
 	public $_divide_precision = 30;
@@ -100,6 +139,10 @@ class StringDecimal {
 			array_shift($sd['mantissa']);
 		}
 		return $sd;
+	}
+
+	function _newparse($str) {
+		return new _StringDecimalNumber($str);
 	}
 
 	function _parse($str) {
