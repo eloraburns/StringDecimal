@@ -8,6 +8,47 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		$this->sd = new StringDecimal();
 	}
 
+	function test__StringDecimalNumber_ArrayAccess() {
+		$sdn = new _StringDecimalNumber("2.3");
+		$this->assertEquals("+", $sdn['sign']);
+		$this->assertEquals(array(2, 3), $sdn['mantissa']);
+		$this->assertEquals(1, $sdn['exponent']);
+	}
+
+	function test__StringDecimalNumber_parse() {
+		$sdn = new _StringDecimalNumber("-2.34e5");
+		$this->assertEquals("-", $sdn->sign);
+		$this->assertEquals(array(2, 3, 4, 0, 0, 0), $sdn->mantissa);
+		$this->assertEquals(0, $sdn->exponent);
+	}
+
+	function test__StringDecimalNumber__match_exponent() {
+		$other = new _StringDecimalNumber("1.0");
+		$test = new _StringDecimalNumber("1");
+		$test->match_exponent($other);
+		$this->assertEquals(array(1, 0), $test->mantissa);
+		$this->assertEquals(1, $test->exponent);
+
+		// Does nothing in this direction...maybe the method name should be more clear...
+		$other = new _StringDecimalNumber("1");
+		$test = new _StringDecimalNumber("1.0");
+		$test->match_exponent($other);
+		$this->assertEquals(array(1, 0), $test->mantissa);
+		$this->assertEquals(1, $test->exponent);
+	}
+
+	function test__StringDecimalNumber__match_leading() {
+		$other = new _StringDecimalNumber("10");
+		$test = new _StringDecimalNumber("1");
+		$test->match_leading($other);
+		$this->assertEquals(array(0, 1), $test->mantissa);
+
+		$other = new _StringDecimalNumber("1");
+		$test = new _StringDecimalNumber("10");
+		$test->match_leading($other);
+		$this->assertEquals(array(1, 0), $test->mantissa);
+	}
+
 	function test__string_to_array() {
 		$this->assertEquals(array(0), $this->sd->_string_to_array("0"));
 		$this->assertEquals(array(1), $this->sd->_string_to_array("1"));

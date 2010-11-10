@@ -9,10 +9,56 @@ class _StringDecimalNumber implements ArrayAccess {
 
 	function __construct($str) {
 		$this->sd = new StringDecimal;
-		$sdn = $this->sd->_oldparse($str);
+		$sdn = $this->parse($str);
 		$this->sign = $sdn['sign'];
 		$this->mantissa = $sdn['mantissa'];
 		$this->exponent = $sdn['exponent'];
+	}
+
+	protected function parse($str) {
+		preg_match("/^(\+|-)?0*(\d+)(?:\.(\d+))?(?:e((?:\+|-)?\d+))?$/i", $str, $matches);
+		$sign = $matches[1] ? $matches[1] : '+';
+		$fractional = strlen($matches[3]) === 0 ? "" : $matches[3];
+		$mantissa_as_a_string = $matches[2] . $fractional;
+		$adjust = strlen($matches[4]) === 0 ? 0 : intval($matches[4]);
+		$exponent = strlen($fractional);
+		$value = array(
+			'sign' => $sign,
+			'mantissa' => $this->sd->_string_to_array($mantissa_as_a_string),
+			'exponent' => $exponent
+		);
+		while ($adjust > 0) {
+			if ($value['exponent'] > 0) {
+				$value['exponent']--;
+			} else {
+				array_push($value['mantissa'], 0);
+			}
+			$adjust--;
+		}
+		while ($adjust < 0) {
+			$value['exponent']++;
+			if ($value['exponent'] >= count($value['mantissa'])) {
+				array_unshift($value['mantissa'], 0);
+			}
+			$adjust++;
+		}
+		return $this->sd->_strip_leading($value);
+	}
+
+	function match_exponent($other) {
+		while ($other->exponent > $this->exponent) {
+			$this->exponent++;
+			array_push($this->mantissa, 0);
+		}
+	}
+
+	function match_leading($other) {
+		if ($this->exponent != $other->exponent) {
+			throw new Exception("Can't match leading with different exponents");
+		}
+		while (count($other->mantissa) > count($this->mantissa)) {
+			array_unshift($this->mantissa, 0);
+		}
 	}
 
 	function offsetGet($k) {
@@ -187,10 +233,12 @@ class StringDecimal {
 	}
 
 	function add($raw_a, $raw_b) {
-		$a = $this->_parse($raw_a);
-		$b = $this->_parse($raw_b);
-		$this->_match_exponents($a, $b);
-		$this->_match_leading($a, $b);
+		$a = new _StringDecimalNumber($raw_a);
+		$b = new _StringDecimalNumber($raw_b);
+		$a->match_exponent($b);
+		$b->match_exponent($a);
+		$a->match_leading($b);
+		$b->match_leading($a);
 		if ($a['sign'] === $b['sign']) {
 			$sum = array(
 				'sign' => $a['sign'],
