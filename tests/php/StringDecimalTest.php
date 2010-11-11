@@ -8,47 +8,6 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		$this->sd = new StringDecimal();
 	}
 
-	function test__StringDecimalNumber_ArrayAccess() {
-		$sdn = new _StringDecimalNumber("2.3");
-		$this->assertEquals("+", $sdn['sign']);
-		$this->assertEquals(array(2, 3), $sdn['mantissa']);
-		$this->assertEquals(1, $sdn['exponent']);
-	}
-
-	function test__StringDecimalNumber_parse() {
-		$sdn = new _StringDecimalNumber("-2.34e5");
-		$this->assertEquals("-", $sdn->sign);
-		$this->assertEquals(array(2, 3, 4, 0, 0, 0), $sdn->mantissa);
-		$this->assertEquals(0, $sdn->exponent);
-	}
-
-	function test__StringDecimalNumber__match_exponent() {
-		$other = new _StringDecimalNumber("1.0");
-		$test = new _StringDecimalNumber("1");
-		$test->match_exponent($other);
-		$this->assertEquals(array(1, 0), $test->mantissa);
-		$this->assertEquals(1, $test->exponent);
-
-		// Does nothing in this direction...maybe the method name should be more clear...
-		$other = new _StringDecimalNumber("1");
-		$test = new _StringDecimalNumber("1.0");
-		$test->match_exponent($other);
-		$this->assertEquals(array(1, 0), $test->mantissa);
-		$this->assertEquals(1, $test->exponent);
-	}
-
-	function test__StringDecimalNumber__match_leading() {
-		$other = new _StringDecimalNumber("10");
-		$test = new _StringDecimalNumber("1");
-		$test->match_leading($other);
-		$this->assertEquals(array(0, 1), $test->mantissa);
-
-		$other = new _StringDecimalNumber("1");
-		$test = new _StringDecimalNumber("10");
-		$test->match_leading($other);
-		$this->assertEquals(array(1, 0), $test->mantissa);
-	}
-
 	function test__string_to_array() {
 		$this->assertEquals(array(0), $this->sd->_string_to_array("0"));
 		$this->assertEquals(array(1), $this->sd->_string_to_array("1"));
@@ -132,69 +91,63 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue($this->sd->_all_zero(array(0, 0)), "array(0, 0)");
 	}
 
-	function assertStringDecimalEquals($a, $b, $msg="") {
-		$this->assertEquals($a['sign'], $b['sign'], "sign mismatch: $msg");
-		$this->assertEquals($a['mantissa'], $b['mantissa'], "mantissa mismatch: $msg");
-		$this->assertEquals($a['exponent'], $b['exponent'], "exponent mismatch: $msg");
-	}
-
 	function test__parse() {
-		$this->assertStringDecimalEquals($this->sd->_parse("0"), array(
+		$this->assertEquals($this->sd->_parse("0"), array(
 			'sign' => '+',
 			'mantissa' => array(0),
 			'exponent' => 0
 		), "zero");
-		$this->assertStringDecimalEquals($this->sd->_parse("-0"), array(
+		$this->assertEquals($this->sd->_parse("-0"), array(
 			'sign' => '-',
 			'mantissa' => array(0),
 			'exponent' => 0
 		), "negative zero");
-		$this->assertStringDecimalEquals($this->sd->_parse("1"), array(
+		$this->assertEquals($this->sd->_parse("1"), array(
 			'sign' => '+',
 			'mantissa' => array(1),
 			'exponent' => 0
 		), "one");
-		$this->assertStringDecimalEquals($this->sd->_parse("+1"), array(
+		$this->assertEquals($this->sd->_parse("+1"), array(
 			'sign' => '+',
 			'mantissa' => array(1),
 			'exponent' => 0
 		), "positive one");
-		$this->assertStringDecimalEquals($this->sd->_parse("-1"), array(
+		$this->assertEquals($this->sd->_parse("-1"), array(
 			'sign' => '-',
 			'mantissa' => array(1),
 			'exponent' => 0
 		), "negative one");
-		$this->assertStringDecimalEquals($this->sd->_parse("10"), array(
+		$this->assertEquals($this->sd->_parse("10"), array(
 			'sign' => '+',
 			'mantissa' => array(1, 0),
 			'exponent' => 0
 		), "ten");
-		$this->assertStringDecimalEquals(array(
+		$this->assertEquals(array(
 			'sign' => '+',
 			'mantissa' => array(1, 0),
 			'exponent' => 1
 		), $this->sd->_parse("1.0"), "one point aught");
-		$this->assertStringDecimalEquals($this->sd->_parse("-1.0"), array(
+		$this->assertEquals($this->sd->_parse("-1.0"), array(
 			'sign' => '-',
 			'mantissa' => array(1, 0),
 			'exponent' => 1
 		), "negative one point aught");
-		$this->assertStringDecimalEquals($this->sd->_parse("0e-1"), array(
+		$this->assertEquals($this->sd->_parse("0e-1"), array(
 			'sign' => '+',
 			'mantissa' => array(0, 0),
 			'exponent' => 1
 		), "0e-1");
-		$this->assertStringDecimalEquals($this->sd->_parse("1e-1"), array(
+		$this->assertEquals($this->sd->_parse("1e-1"), array(
 			'sign' => '+',
 			'mantissa' => array(0, 1),
 			'exponent' => 1
 		), "1e-1");
-		$this->assertStringDecimalEquals($this->sd->_parse("1e+1"), array(
+		$this->assertEquals($this->sd->_parse("1e+1"), array(
 			'sign' => '+',
 			'mantissa' => array(1, 0),
 			'exponent' => 0
 		), "1e+1");
-		$this->assertStringDecimalEquals($this->sd->_parse("1e1"), array(
+		$this->assertEquals($this->sd->_parse("1e1"), array(
 			'sign' => '+',
 			'mantissa' => array(1, 0),
 			'exponent' => 0
