@@ -1,6 +1,6 @@
 /* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php */
 var StringDecimal = {
-	_divide_precision: 30,
+	_precision: 30,
 
 	_all_zero: function(a) {
 		for (var i = 0; i < a.length; i++) {
@@ -129,6 +129,9 @@ var StringDecimal = {
 			'mantissa': this._string_to_array(mantissa_as_a_string),
 			'exponent': exponent
 		};
+		if (adjust > (this._precision * 2))  {
+			throw "Number too big";
+		}
 		while (adjust > 0) {
 			if (value.exponent > 0) {
 				value.exponent--;
@@ -244,11 +247,7 @@ var StringDecimal = {
 			return "NaN";
 		}
 		if (this._all_zero(a.mantissa)) {
-			return this.round(this._format({
-				'sign': (a.sign == b.sign) ? '+' : '-',
-				'mantissa': [0],
-				'exponent': 0
-			}), places);
+			return this.round((((a.sign == b.sign) ? '+' : '-') + "0"), places);
 		}
 
 		var adjust = 0;
@@ -279,7 +278,7 @@ var StringDecimal = {
 		// Magic numbers!  See the wikipedia article.
 		var x = this.add("2.9142", this.multiply(new_b, "-2"));
 		var old_x = "";
-		while (old_x.substr(0,this._divide_precision+2) != x.substr(0,this._divide_precision+2)) {
+		while (old_x.substr(0,this._precision+2) != x.substr(0,this._precision+2)) {
 			old_x = x;
 			x = this.round(
 				this.multiply(
@@ -289,7 +288,7 @@ var StringDecimal = {
 						this.multiply(new_b, x)
 					)
 				),
-				this._divide_precision*2
+				this._precision*2
 			);
 		}
 

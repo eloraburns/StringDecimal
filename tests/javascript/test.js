@@ -95,7 +95,16 @@ test("_parse", function() {
 		'mantissa': [1, 0],
 		'exponent': 0
 	}, "1e1");
+});
 
+test("_parse__toobig", function() {
+	StringDecimal._parse("1e" + StringDecimal._precision*2);
+	try {
+		StringDecimal._parse("1e" + (StringDecimal._precision*2 + 1));
+		equal(true, false, "Shouldn't parse over _precision*2");
+	} catch (e) {
+		same("Number too big", e);
+	}
 });
 
 test("_format", function() {

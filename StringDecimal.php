@@ -3,11 +3,11 @@
 
 class StringDecimal {
 
-	public $_divide_precision = 30;
+	public $_precision = 30;
 
 	function __construct($divide_precision = NULL) {
 		if ($divide_precision !== NULL) {
-			$this->_divide_precision = intval($divide_precision);
+			$this->_precision = intval($divide_precision);
 		}
 	}
 
@@ -114,6 +114,9 @@ class StringDecimal {
 			'mantissa' => $this->_string_to_array($mantissa_as_a_string),
 			'exponent' => $exponent
 		);
+		if ($adjust > ($this->_precision * 2)) {
+			throw new Exception("Number too big");
+		}
 		while ($adjust > 0) {
 			if ($value['exponent'] > 0) {
 				$value['exponent']--;
@@ -261,7 +264,7 @@ class StringDecimal {
 		// Magic numbers!  See the wikipedia article
 		$x = $this->add("2.9142", $this->multiply($new_b, "-2"));
 		$old_x = "";
-		while (substr($old_x, 0, $this->_divide_precision+2) !== substr($x, 0, $this->_divide_precision+2)) {
+		while (substr($old_x, 0, $this->_precision+2) !== substr($x, 0, $this->_precision+2)) {
 			$old_x = $x;
 			$x = $this->round(
 				$this->multiply(
@@ -271,7 +274,7 @@ class StringDecimal {
 						$this->multiply($new_b, $x)
 					)
 				),
-				$this->_divide_precision*2
+				$this->_precision*2
 			);
 		}
 
