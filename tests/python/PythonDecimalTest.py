@@ -1,7 +1,7 @@
 from decimal import Decimal, getcontext, DivisionByZero, ROUND_HALF_UP
 import json
 
-with open('tests.json') as f:
+with open('../tests.json') as f:
     # Toss the first line, it's just for JavaScript
     f.readline()
     tests = json.loads(f.read())
