@@ -1,4 +1,6 @@
-/* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php */
+/* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+ * Copyright (c) 2010 Taavi Burns <taavi@taaviburns.ca>
+ */
 var StringDecimal = {
 	_precision: 30,
 
