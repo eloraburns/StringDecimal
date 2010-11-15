@@ -278,7 +278,8 @@ var StringDecimal = {
 		// Magic numbers!  See the wikipedia article.
 		var x = this.add("2.9142", this.multiply(new_b, "-2"));
 		var old_x = "";
-		while (old_x.substr(0,this._precision+2) != x.substr(0,this._precision+2)) {
+		var loop_limit = this._precision;
+		while (loop_limit && old_x.substr(0,this._precision+2) != x.substr(0,this._precision+2)) {
 			old_x = x;
 			x = this.round(
 				this.multiply(
@@ -290,6 +291,10 @@ var StringDecimal = {
 				),
 				this._precision*2
 			);
+			loop_limit--;
+		}
+		if (loop_limit <= 0) {
+			throw ("Reciprocal failed to converge in " + this._precision + " iterations");
 		}
 
 		var new_a = this.multiply(this.multiply(x, raw_a), extra_factor+"e"+adjust);

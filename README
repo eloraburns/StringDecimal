@@ -23,4 +23,4 @@ Bugs
 * Internal operations shouldn't go back through strings; just pass around internal representations
 * Mutations should be avoided
 * Prefer passing around whole values instead of an array here and an int there
-* Divide iterations should be bounded.
+* Divide iterations could be bounded more tightly; one iteration per digit is probably too much (need to look up the convergence rate guaranteed by the algorithm)

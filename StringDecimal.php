@@ -264,7 +264,8 @@ class StringDecimal {
 		// Magic numbers!  See the wikipedia article
 		$x = $this->add("2.9142", $this->multiply($new_b, "-2"));
 		$old_x = "";
-		while (substr($old_x, 0, $this->_precision+2) !== substr($x, 0, $this->_precision+2)) {
+		$loop_limit = $this->_precision;
+		while ($loop_limit && substr($old_x, 0, $this->_precision+2) !== substr($x, 0, $this->_precision+2)) {
 			$old_x = $x;
 			$x = $this->round(
 				$this->multiply(
@@ -276,6 +277,9 @@ class StringDecimal {
 				),
 				$this->_precision*2
 			);
+		}
+		if ($loop_limit <= 0) {
+			throw new Exception("Reciprocal failed to converge in {$this->_precision} iterations");
 		}
 
 		$new_a = $this->multiply($this->multiply($x, $raw_a), $extra_factor . "e" . $adjust);
