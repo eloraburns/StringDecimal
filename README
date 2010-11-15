@@ -6,16 +6,16 @@ The parse operation is bounded in two ways:
 2. Numeric expressions with an "e" will consume O(n+e) in the final representation.
 
 The add operation of an n and m digit pair is bounded by:
-1. memory O(3(n+m)), cpu O(2(n+m))
+1. memory O(n+m), cpu O(n+m)
 
 The subtract operation is just the add operation, but currently copies the second argument, so we get:
-1. memory O(3(n+m)+m), cpu O(2(n+m))
+1. memory O(3(n+m)+m), cpu O(n+m)
 
-The multiply operation is implemented with a 2-nested loop:
-1. memory O(n+m), cpu O(nm)
+The multiply operation is implemented with a 2-nested accumulation loop:
+1. memory O(n+m), cpu O(n*m)
 
-The divide operation is implemented in terms of add, subtract, and multiply:
-1. (figure this out, but should be bounded)
+The divide operation is implemented in terms of add, subtract, and multiply, with intermediate rounding based on precision and final rounding based on places:
+1. memory O(n+m+_precision+places), cpu O(n*m*_precision+places)
 
 Bugs
 ====
