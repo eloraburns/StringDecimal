@@ -1,0 +1,26 @@
+On bounding
+===========
+
+The parse operation is bounded in two ways:
+1. Numeric expressions without an "e" will consume O(n) in the final representation.
+2. Numeric expressions with an "e" will consume O(n+e) in the final representation.
+
+The add operation of an n and m digit pair is bounded by:
+1. memory O(3(n+m)), cpu O(2(n+m))
+
+The subtract operation is just the add operation, but currently copies the second argument, so we get:
+1. memory O(3(n+m)+m), cpu O(2(n+m))
+
+The multiply operation is implemented with a 2-nested loop:
+1. memory O(n+m), cpu O(nm)
+
+The divide operation is implemented in terms of add, subtract, and multiply:
+1. (figure this out, but should be bounded)
+
+Bugs
+====
+* Divide very probably uses more memory than necessary.  Do we need _precision*2 reciprocal digits to guarantee convergence?
+* Internal operations shouldn't go back through strings; just pass around internal representations
+* Mutations should be avoided
+* Prefer passing around whole values instead of an array here and an int there
+* Divide iterations should be bounded.
