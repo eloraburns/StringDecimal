@@ -350,7 +350,7 @@ test("divide_tiny_by_huge", function() {
 	);
 });
 
-/* operator_tests is included via HTML wholsale (from tests.json) */
+/* operator_tests is included via HTML wholesale (from tests.json) */
 
 for (var i = 0; i < operator_tests.length; i++) {
 	var testcase = operator_tests[i];
