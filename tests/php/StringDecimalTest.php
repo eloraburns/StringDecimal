@@ -281,6 +281,8 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function test_divide_tiny_by_huge() {
+		// This test is here and not in tests.json because Python's Decimal class
+		// will smash the result into scientific notation.
 		$this->assertEquals(
 			"0.000000000000000000000000000100",
 			$this->sd->divide("0.00000000000001", "100000000000000", "30")
