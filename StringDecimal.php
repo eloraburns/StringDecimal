@@ -2,6 +2,9 @@
 /* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
  * Copyright (c) 2010 Taavi Burns <taavi@taaviburns.ca>
  */
+
+class StringDecimalException extends Exception {}
+
 class StringDecimal {
 
 	public $_precision = 30;
@@ -23,7 +26,7 @@ class StringDecimal {
 
 	function _array_add($a, $b) {
 		if (count($a) !== count($b)) {
-			throw new Exception("Arrays of dissimilar length cannot be added");
+			throw new StringDecimalException("Arrays of dissimilar length cannot be added");
 		}
 		$result = array();
 		for ($i = 0; $i < count($a); $i++) {
@@ -82,7 +85,7 @@ class StringDecimal {
 
 	function _match_leading(&$a, &$b) {
 		if ($a['exponent'] !== $b['exponent']) {
-			throw new Exception("Can't match leading with different exponents");
+			throw new StringDecimalException("Can't match leading with different exponents");
 		}
 		while (count($a['mantissa']) > count($b['mantissa'])) {
 			array_unshift($b['mantissa'], 0);
@@ -116,7 +119,7 @@ class StringDecimal {
 			'exponent' => $exponent
 		);
 		if ($adjust > ($this->_precision * 2)) {
-			throw new Exception("Number too big");
+			throw new StringDecimalException("Number too big");
 		}
 		while ($adjust > 0) {
 			if ($value['exponent'] > 0) {
@@ -280,7 +283,7 @@ class StringDecimal {
 			);
 		}
 		if ($loop_limit <= 0) {
-			throw new Exception("Reciprocal failed to converge in {$this->_precision} iterations");
+			throw new StringDecimalException("Reciprocal failed to converge in {$this->_precision} iterations");
 		}
 
 		$new_a = $this->multiply($this->multiply($x, $raw_a), $extra_factor . "e" . $adjust);

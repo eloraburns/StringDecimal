@@ -156,15 +156,13 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 
 	function test__parse__toobig() {
 		$this->sd->_parse("1e" . $this->sd->_precision*2);
-		$caught = False;
 		try {
 			$biggie = "1e" . ($this->sd->_precision*2 + 1);
 			$this->sd->_parse($biggie);
-		} catch (Exception $e) {
-			$caught = True;
+			$this->fail("Shouldn't parse over _precision*2: $biggie");
+		} catch (StringDecimalException $e) {
 			$this->assertEquals("Number too big", $e->getMessage());
 		}
-		$this->assertTrue($caught, "Shouldn't parse over _precision*2: $biggie");
 	}
 
 	function test__format() {
