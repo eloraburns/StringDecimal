@@ -352,6 +352,42 @@ test("divide_tiny_by_huge", function() {
 	);
 });
 
+test("round_too_big", function() {
+	var expected = "0.";
+	for (var x = 0; x < StringDecimal._precision*2; x++) {
+		expected += "0";
+	}
+	same(
+		StringDecimal.round("0", StringDecimal._precision*2),
+		expected,
+		"Rounding exactly to _precision*2"
+	);
+	try {
+		StringDecimal.round("0", StringDecimal._precision*2+1);
+		same(true, false, "Exception NOT thrown for param out of bounds");
+	} catch (e) {
+		same("Places too big", e, "Exception thrown for param out of bounds");
+	}
+});
+
+test("divide_places_too_big", function() {
+	var expected = "1.";
+	for (var x = 0; x < StringDecimal._precision; x++) {
+		expected += "0";
+	}
+	same(
+		StringDecimal.divide("1", "1", StringDecimal._precision),
+		expected,
+		"Divide with places exactly to _precision"
+	);
+	try {
+		StringDecimal.divide("1", "1", StringDecimal._precision+1),
+		same(true, false, "Exception NOT thrown for param out of bounds");
+	} catch (e) {
+		same("Places too big", e, "Exception thrown for param out of bounds");
+	}
+});
+
 /* operator_tests is included via HTML wholesale (from tests.json) */
 
 for (var i = 0; i < operator_tests.length; i++) {

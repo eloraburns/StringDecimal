@@ -225,6 +225,11 @@ class StringDecimal {
 
 	function divide($raw_a, $raw_b, $places) {
 		// See http://en.wikipedia.org/wiki/Division_(digital)#Newton.E2.80.93Raphson_division
+		$integer_places = intval($places, 10);
+		if ($integer_places > $this->_precision) {
+			// Doesn't make sense to let someone round to more places than our precision
+			throw new StringDecimalException("Places too big");
+		}
 		$a = $this->_parse($raw_a);
 		$b = $this->_parse($raw_b);
 
@@ -236,7 +241,7 @@ class StringDecimal {
 				'sign' => ($a['sign'] === $b['sign']) ? '+' : '-',
 				'mantissa' => array(0),
 				'exponent' => 0
-			)), $places);
+			)), $integer_places);
 		}
 
 		$adjust = 0;
@@ -288,11 +293,16 @@ class StringDecimal {
 
 		$new_a = $this->multiply($this->multiply($x, $raw_a), $extra_factor . "e" . $adjust);
 
-		return $this->round($new_a, $places);
+		return $this->round($new_a, $integer_places);
 	}
 
 	function round($raw_a, $places) {
 		$integer_places = intval($places, 10);
+		if ($integer_places > $this->_precision*2) {
+			// Need to clamp somewhere, and the divide routine
+			// needs us to be able to round to _precision*2.
+			throw new StringDecimalException("Places too big");
+		}
 		$a = $this->_parse($raw_a);
 		if ($a['exponent'] > $integer_places) {
 			while ($a['exponent'] > $integer_places+1) {

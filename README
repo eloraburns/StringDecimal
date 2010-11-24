@@ -45,4 +45,3 @@ Bugs
 * Mutations should be avoided
 * Prefer passing around whole values instead of an array here and an int there
 * Divide iterations could be bounded more tightly; one iteration per digit is probably too much (need to look up the convergence rate guaranteed by the algorithm)
-* Round is unbounded (pass in 1M for digits, and watch memory evaporate)

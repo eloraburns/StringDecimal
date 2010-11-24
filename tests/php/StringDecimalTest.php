@@ -340,6 +340,46 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		);
 	}
 
+	function test_round_too_big() {
+		$expected = "0.";
+		for ($x = 0; $x < $this->sd->_precision*2; $x++) {
+			$expected .= "0";
+		}
+		$this->assertEquals(
+			$expected,
+			$this->sd->round("0", $this->sd->_precision*2)
+		);
+		try {
+			$this->sd->round("0", $this->sd->_precision*2+1);
+			$this->fail("Exception NOT thrown for param out of bounds");
+		} catch (StringDecimalException $e) {
+			$this->assertEquals(
+				"Places too big",
+				$e->getMessage()
+			);
+		}
+	}
+
+	function test_divide_places_too_big() {
+		$expected = "1.";
+		for ($x = 0; $x < $this->sd->_precision; $x++) {
+			$expected .= "0";
+		}
+		$this->assertEquals(
+			$expected,
+			$this->sd->divide("1", "1", $this->sd->_precision)
+		);
+		try {
+			$this->sd->divide("1", "1", $this->sd->_precision+1);
+			$this->fail("Exception NOT thrown for param out of bounds");
+		} catch (StringDecimalException $e) {
+			$this->assertEquals(
+				"Places too big",
+				$e->getMessage()
+			);
+		}
+	}
+
 	static function shared_testcases() {
 		$f = fopen("../tests.json", "r");
 		fseek($f, 21);

@@ -242,6 +242,11 @@ var StringDecimal = {
 
 	divide: function(raw_a, raw_b, places) {
 		// See http://en.wikipedia.org/wiki/Division_(digital)#Newton.E2.80.93Raphson_division
+		var integer_places = parseInt(places, 10);
+		if (integer_places > this._precision) {
+			// Doesn't make sense to let someone round to more places than our precision
+			throw "Places too big";
+		}
 		var a = this._parse(raw_a);
 		var b = this._parse(raw_b);
 
@@ -249,7 +254,7 @@ var StringDecimal = {
 			return "NaN";
 		}
 		if (this._all_zero(a.mantissa)) {
-			return this.round((((a.sign == b.sign) ? '+' : '-') + "0"), places);
+			return this.round((((a.sign == b.sign) ? '+' : '-') + "0"), integer_places);
 		}
 
 		var adjust = 0;
@@ -301,11 +306,16 @@ var StringDecimal = {
 
 		var new_a = this.multiply(this.multiply(x, raw_a), extra_factor+"e"+adjust);
 
-		return this.round(new_a, places);
+		return this.round(new_a, integer_places);
 	},
 
 	round: function(raw_a, places) {
 		var integer_places = parseInt(places, 10);
+		if (integer_places > this._precision*2) {
+			// Need to clamp somewhere, and the divide routine
+			// needs us to be able to round to _precision*2.
+			throw "Places too big";
+		}
 		var a = this._parse(raw_a);
 		if (a.exponent > integer_places) {
 			while (a.exponent > integer_places+1) {
