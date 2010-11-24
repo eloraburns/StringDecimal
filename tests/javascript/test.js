@@ -95,7 +95,16 @@ test("_parse", function() {
 		'mantissa': [1, 0],
 		'exponent': 0
 	}, "1e1");
+});
 
+test("_parse__toobig", function() {
+	StringDecimal._parse("1e" + StringDecimal._precision*2);
+	try {
+		StringDecimal._parse("1e" + (StringDecimal._precision*2 + 1));
+		equal(true, false, "Shouldn't parse over _precision*2");
+	} catch (e) {
+		same("Number too big", e);
+	}
 });
 
 test("_format", function() {
@@ -267,7 +276,119 @@ test("_all_zero", function() {
 	same(StringDecimal._all_zero([0, 0]), true, "[0, 0]");
 });
 
-/* operator_tests is included via HTML wholsale (from tests.json) */
+test("divide_tiny_by_huge", function() {
+	// This test is here and not in tests.json because Python's Decimal class
+	// will smash the result into scientific notation.
+	same(
+		StringDecimal.divide("0.00000000000001", "100000000000000", "30"),
+		"0.000000000000000000000000000100",
+		"1e-14 / 1e14"
+	);
+	same(
+		StringDecimal.divide("0.000000000000001", "100000000000000", "30"),
+		"0.000000000000000000000000000010",
+		"1e-15 / 1e14"
+	);
+	same(
+		StringDecimal.divide("0.00000000000001", "1000000000000000", "30"),
+		"0.000000000000000000000000000010",
+		"1e-14 / 1e15"
+	);
+	same(
+		StringDecimal.divide("0.000000000000001", "1000000000000000", "30"),
+		"0.000000000000000000000000000001",
+		"1e-15 / 1e15"
+	);
+	same(
+		StringDecimal.divide("0.0000000000000001", "1000000000000000", "30"),
+		"0.000000000000000000000000000000",
+		"1e-16 / 1e15"
+	);
+	same(
+		StringDecimal.divide("0.000000000000001", "10000000000000000", "30"),
+		"0.000000000000000000000000000000",
+		"1e-15 / 1e16"
+	);
+	same(
+		StringDecimal.divide("0.0000000000000001", "10000000000000000", "30"),
+		"0.000000000000000000000000000000",
+		"1e-16 / 1e16"
+	);
+
+	same(
+		StringDecimal.divide("0.00000000000001", "200000000000000", "30"),
+		"0.000000000000000000000000000050",
+		"1e-14 / 2e14"
+	);
+	same(
+		StringDecimal.divide("0.000000000000001", "200000000000000", "30"),
+		"0.000000000000000000000000000005",
+		"1e-15 / 2e14"
+	);
+	same(
+		StringDecimal.divide("0.00000000000001", "2000000000000000", "30"),
+		"0.000000000000000000000000000005",
+		"1e-14 / 2e15"
+	);
+	same(
+		StringDecimal.divide("0.000000000000001", "2000000000000000", "30"),
+		"0.000000000000000000000000000001",
+		"1e-15 / 2e15"
+	);
+	same(
+		StringDecimal.divide("0.0000000000000001", "2000000000000000", "30"),
+		"0.000000000000000000000000000000",
+		"1e-16 / 2e15"
+	);
+	same(
+		StringDecimal.divide("0.000000000000001", "20000000000000000", "30"),
+		"0.000000000000000000000000000000",
+		"1e-15 / 2e16"
+	);
+	same(
+		StringDecimal.divide("0.0000000000000001", "20000000000000000", "30"),
+		"0.000000000000000000000000000000",
+		"1e-16 / 2e16"
+	);
+});
+
+test("round_too_big", function() {
+	var expected = "0.";
+	for (var x = 0; x < StringDecimal._precision*2; x++) {
+		expected += "0";
+	}
+	same(
+		StringDecimal.round("0", StringDecimal._precision*2),
+		expected,
+		"Rounding exactly to _precision*2"
+	);
+	try {
+		StringDecimal.round("0", StringDecimal._precision*2+1);
+		same(true, false, "Exception NOT thrown for param out of bounds");
+	} catch (e) {
+		same("Places too big", e, "Exception thrown for param out of bounds");
+	}
+});
+
+test("divide_places_too_big", function() {
+	var expected = "1.";
+	for (var x = 0; x < StringDecimal._precision; x++) {
+		expected += "0";
+	}
+	same(
+		StringDecimal.divide("1", "1", StringDecimal._precision),
+		expected,
+		"Divide with places exactly to _precision"
+	);
+	try {
+		StringDecimal.divide("1", "1", StringDecimal._precision+1),
+		same(true, false, "Exception NOT thrown for param out of bounds");
+	} catch (e) {
+		same("Places too big", e, "Exception thrown for param out of bounds");
+	}
+});
+
+/* operator_tests is included via HTML wholesale (from tests.json) */
 
 for (var i = 0; i < operator_tests.length; i++) {
 	var testcase = operator_tests[i];

@@ -1,13 +1,17 @@
 <?php
-/* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php */
+/* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+ * Copyright (c) 2010 Taavi Burns <taavi@taaviburns.ca>
+ */
+
+class StringDecimalException extends Exception {}
 
 class StringDecimal {
 
-	public $_divide_precision = 30;
+	public $_precision = 30;
 
 	function __construct($divide_precision = NULL) {
 		if ($divide_precision !== NULL) {
-			$this->_divide_precision = intval($divide_precision);
+			$this->_precision = intval($divide_precision);
 		}
 	}
 
@@ -22,7 +26,7 @@ class StringDecimal {
 
 	function _array_add($a, $b) {
 		if (count($a) !== count($b)) {
-			throw new Exception("Arrays of dissimilar length cannot be added");
+			throw new StringDecimalException("Arrays of dissimilar length cannot be added");
 		}
 		$result = array();
 		for ($i = 0; $i < count($a); $i++) {
@@ -81,7 +85,7 @@ class StringDecimal {
 
 	function _match_leading(&$a, &$b) {
 		if ($a['exponent'] !== $b['exponent']) {
-			throw new Exception("Can't match leading with different exponents");
+			throw new StringDecimalException("Can't match leading with different exponents");
 		}
 		while (count($a['mantissa']) > count($b['mantissa'])) {
 			array_unshift($b['mantissa'], 0);
@@ -114,6 +118,9 @@ class StringDecimal {
 			'mantissa' => $this->_string_to_array($mantissa_as_a_string),
 			'exponent' => $exponent
 		);
+		if ($adjust > ($this->_precision * 2)) {
+			throw new StringDecimalException("Number too big");
+		}
 		while ($adjust > 0) {
 			if ($value['exponent'] > 0) {
 				$value['exponent']--;
@@ -218,6 +225,11 @@ class StringDecimal {
 
 	function divide($raw_a, $raw_b, $places) {
 		// See http://en.wikipedia.org/wiki/Division_(digital)#Newton.E2.80.93Raphson_division
+		$integer_places = intval($places, 10);
+		if ($integer_places > $this->_precision) {
+			// Doesn't make sense to let someone round to more places than our precision
+			throw new StringDecimalException("Places too big");
+		}
 		$a = $this->_parse($raw_a);
 		$b = $this->_parse($raw_b);
 
@@ -229,7 +241,7 @@ class StringDecimal {
 				'sign' => ($a['sign'] === $b['sign']) ? '+' : '-',
 				'mantissa' => array(0),
 				'exponent' => 0
-			)), $places);
+			)), $integer_places);
 		}
 
 		$adjust = 0;
@@ -261,7 +273,8 @@ class StringDecimal {
 		// Magic numbers!  See the wikipedia article
 		$x = $this->add("2.9142", $this->multiply($new_b, "-2"));
 		$old_x = "";
-		while (substr($old_x, 0, $this->_divide_precision+2) !== substr($x, 0, $this->_divide_precision+2)) {
+		$loop_limit = $this->_precision;
+		while ($loop_limit && substr($old_x, 0, $this->_precision+2) !== substr($x, 0, $this->_precision+2)) {
 			$old_x = $x;
 			$x = $this->round(
 				$this->multiply(
@@ -271,17 +284,25 @@ class StringDecimal {
 						$this->multiply($new_b, $x)
 					)
 				),
-				$this->_divide_precision*2
+				$this->_precision*2
 			);
+		}
+		if ($loop_limit <= 0) {
+			throw new StringDecimalException("Reciprocal failed to converge in {$this->_precision} iterations");
 		}
 
 		$new_a = $this->multiply($this->multiply($x, $raw_a), $extra_factor . "e" . $adjust);
 
-		return $this->round($new_a, $places);
+		return $this->round($new_a, $integer_places);
 	}
 
 	function round($raw_a, $places) {
 		$integer_places = intval($places, 10);
+		if ($integer_places > $this->_precision*2) {
+			// Need to clamp somewhere, and the divide routine
+			// needs us to be able to round to _precision*2.
+			throw new StringDecimalException("Places too big");
+		}
 		$a = $this->_parse($raw_a);
 		if ($a['exponent'] > $integer_places) {
 			while ($a['exponent'] > $integer_places+1) {

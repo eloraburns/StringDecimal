@@ -1,6 +1,8 @@
-/* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php */
+/* Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+ * Copyright (c) 2010 Taavi Burns <taavi@taaviburns.ca>
+ */
 var StringDecimal = {
-	_divide_precision: 30,
+	_precision: 30,
 
 	_all_zero: function(a) {
 		for (var i = 0; i < a.length; i++) {
@@ -129,6 +131,9 @@ var StringDecimal = {
 			'mantissa': this._string_to_array(mantissa_as_a_string),
 			'exponent': exponent
 		};
+		if (adjust > (this._precision * 2))  {
+			throw "Number too big";
+		}
 		while (adjust > 0) {
 			if (value.exponent > 0) {
 				value.exponent--;
@@ -237,6 +242,11 @@ var StringDecimal = {
 
 	divide: function(raw_a, raw_b, places) {
 		// See http://en.wikipedia.org/wiki/Division_(digital)#Newton.E2.80.93Raphson_division
+		var integer_places = parseInt(places, 10);
+		if (integer_places > this._precision) {
+			// Doesn't make sense to let someone round to more places than our precision
+			throw "Places too big";
+		}
 		var a = this._parse(raw_a);
 		var b = this._parse(raw_b);
 
@@ -244,11 +254,7 @@ var StringDecimal = {
 			return "NaN";
 		}
 		if (this._all_zero(a.mantissa)) {
-			return this.round(this._format({
-				'sign': (a.sign == b.sign) ? '+' : '-',
-				'mantissa': [0],
-				'exponent': 0
-			}), places);
+			return this.round((((a.sign == b.sign) ? '+' : '-') + "0"), integer_places);
 		}
 
 		var adjust = 0;
@@ -279,7 +285,8 @@ var StringDecimal = {
 		// Magic numbers!  See the wikipedia article.
 		var x = this.add("2.9142", this.multiply(new_b, "-2"));
 		var old_x = "";
-		while (old_x.substr(0,this._divide_precision+2) != x.substr(0,this._divide_precision+2)) {
+		var loop_limit = this._precision;
+		while (loop_limit && old_x.substr(0,this._precision+2) != x.substr(0,this._precision+2)) {
 			old_x = x;
 			x = this.round(
 				this.multiply(
@@ -289,17 +296,26 @@ var StringDecimal = {
 						this.multiply(new_b, x)
 					)
 				),
-				this._divide_precision*2
+				this._precision*2
 			);
+			loop_limit--;
+		}
+		if (loop_limit <= 0) {
+			throw ("Reciprocal failed to converge in " + this._precision + " iterations");
 		}
 
 		var new_a = this.multiply(this.multiply(x, raw_a), extra_factor+"e"+adjust);
 
-		return this.round(new_a, places);
+		return this.round(new_a, integer_places);
 	},
 
 	round: function(raw_a, places) {
 		var integer_places = parseInt(places, 10);
+		if (integer_places > this._precision*2) {
+			// Need to clamp somewhere, and the divide routine
+			// needs us to be able to round to _precision*2.
+			throw "Places too big";
+		}
 		var a = this._parse(raw_a);
 		if (a.exponent > integer_places) {
 			while (a.exponent > integer_places+1) {

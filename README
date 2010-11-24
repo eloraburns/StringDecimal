@@ -1,0 +1,47 @@
+On bounding
+===========
+
+The parse operation is bounded in two ways:
+1. Numeric expressions without an "e" will consume O(n) in the final representation.
+2. Numeric expressions with an "e" will consume O(n+e) in the final representation, and e is limited to _precision*2.
+
+The add operation of an n and m digit pair is bounded by the length of their sum:
+Memory: O(n+m)
+CPU: O(n+m)
+
+The subtract operation is just the add operation, but copies the second argument, so we get:
+Memory: O(n+3m)
+CPU: O(n+3m)
+
+The multiply operation is implemented with a 2-nested accumulation loop.  We accumulate the final mantissa in-place, but we have to calculate the product of each pair of n's and m's digits:
+Memory: O(n+m)
+CPU: O(n*m)
+
+The round operation removes or adds zeros until the number has the right number of places, then might do a carry operation (to handle rounding-up):
+Memory: O(m+places)
+CPU: O(m+places)
+
+The divide operation is implemented in terms of add, subtract, and multiply, with intermediate rounding based on precision and final rounding based on places.
+1. The pre-work (getting the divisor into the desired state)
+   Parse, munge, format: O(m)
+   Multiply by a 1-digit number: O(m)
+   Multiply by another 1-digit number: O(m)
+   Add to a 5-digit number: O(m)
+2. Iterating to find the reciprocal, no more than _precision times (failsafe).  Should only take 5 or 6 iterations to get 30 significant digits.
+   We clamp to m=_precision*2 digits.
+   Multiply divisor by iterand: O(n*m)
+   Subtract iterand from 2: O(m)
+   Multiply iterand by the difference: O(m*m)
+   Round: O(_precision)
+3. Multiply by the reciprocal (and residual adjust)
+   Multiply dividend by reciprocal: O(n*_precision)
+   Multiply that by our extra factor with base10 e adjust (from the original divisor): O((n+_precision)*m)
+   Round it to places: O(n+_precision+m+places)
+
+Bugs
+====
+* Divide very probably uses more memory than necessary.  Do we need _precision*2 reciprocal digits to guarantee convergence?
+* Internal operations shouldn't go back through strings; just pass around internal representations
+* Mutations should be avoided
+* Prefer passing around whole values instead of an array here and an int there
+* Divide iterations could be bounded more tightly; one iteration per digit is probably too much (need to look up the convergence rate guaranteed by the algorithm)

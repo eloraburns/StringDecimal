@@ -154,6 +154,17 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		), "1e1");
 	}
 
+	function test__parse__toobig() {
+		$this->sd->_parse("1e" . $this->sd->_precision*2);
+		try {
+			$biggie = "1e" . ($this->sd->_precision*2 + 1);
+			$this->sd->_parse($biggie);
+			$this->fail("Shouldn't parse over _precision*2: $biggie");
+		} catch (StringDecimalException $e) {
+			$this->assertEquals("Number too big", $e->getMessage());
+		}
+	}
+
 	function test__format() {
 		$this->assertEquals($this->sd->_format(array(
 			'sign' => '+',
@@ -265,6 +276,108 @@ class StringDecimalTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(0, $a['exponent']);
 		$this->assertEquals($b['mantissa'], $a['mantissa']);
 		$this->assertEquals($b['exponent'], $a['exponent']);
+	}
+
+	function test_divide_tiny_by_huge() {
+		// This test is here and not in tests.json because Python's Decimal class
+		// will smash the result into scientific notation.
+		$this->assertEquals(
+			"0.000000000000000000000000000100",
+			$this->sd->divide("0.00000000000001", "100000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000010",
+			$this->sd->divide("0.000000000000001", "100000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000010",
+			$this->sd->divide("0.00000000000001", "1000000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000001",
+			$this->sd->divide("0.000000000000001", "1000000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000000",
+			$this->sd->divide("0.0000000000000001", "1000000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000000",
+			$this->sd->divide("0.000000000000001", "10000000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000000",
+			$this->sd->divide("0.0000000000000001", "10000000000000000", "30")
+		);
+
+		$this->assertEquals(
+			"0.000000000000000000000000000050",
+			$this->sd->divide("0.00000000000001", "200000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000005",
+			$this->sd->divide("0.000000000000001", "200000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000005",
+			$this->sd->divide("0.00000000000001", "2000000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000001",
+			$this->sd->divide("0.000000000000001", "2000000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000000",
+			$this->sd->divide("0.0000000000000001", "2000000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000000",
+			$this->sd->divide("0.000000000000001", "20000000000000000", "30")
+		);
+		$this->assertEquals(
+			"0.000000000000000000000000000000",
+			$this->sd->divide("0.0000000000000001", "20000000000000000", "30")
+		);
+	}
+
+	function test_round_too_big() {
+		$expected = "0.";
+		for ($x = 0; $x < $this->sd->_precision*2; $x++) {
+			$expected .= "0";
+		}
+		$this->assertEquals(
+			$expected,
+			$this->sd->round("0", $this->sd->_precision*2)
+		);
+		try {
+			$this->sd->round("0", $this->sd->_precision*2+1);
+			$this->fail("Exception NOT thrown for param out of bounds");
+		} catch (StringDecimalException $e) {
+			$this->assertEquals(
+				"Places too big",
+				$e->getMessage()
+			);
+		}
+	}
+
+	function test_divide_places_too_big() {
+		$expected = "1.";
+		for ($x = 0; $x < $this->sd->_precision; $x++) {
+			$expected .= "0";
+		}
+		$this->assertEquals(
+			$expected,
+			$this->sd->divide("1", "1", $this->sd->_precision)
+		);
+		try {
+			$this->sd->divide("1", "1", $this->sd->_precision+1);
+			$this->fail("Exception NOT thrown for param out of bounds");
+		} catch (StringDecimalException $e) {
+			$this->assertEquals(
+				"Places too big",
+				$e->getMessage()
+			);
+		}
 	}
 
 	static function shared_testcases() {
